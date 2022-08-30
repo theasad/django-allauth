@@ -18,15 +18,15 @@ class OktaOAuth2Adapter(OAuth2Adapter):
 
     @property
     def access_token_url(self):
-        return "https://{}/oauth2/v1/token".format(self.okta_base_url)
+        return f"https://{self.okta_base_url}/oauth2/v1/token"
 
     @property
     def authorize_url(self):
-        return "https://{}/oauth2/v1/authorize".format(self.okta_base_url)
+        return f"https://{self.okta_base_url}/oauth2/v1/authorize"
 
     @property
     def userinfo_url(self):
-        return "https://{}/oauth2/v1/userinfo".format(self.okta_base_url)
+        return f"https://{self.okta_base_url}/oauth2/v1/userinfo"
 
     @property
     def access_token_method(self):
@@ -45,14 +45,13 @@ class OktaOAuth2Adapter(OAuth2Adapter):
         """
 
         resp = requests.get(
-            self.userinfo_url,
-            headers={"Authorization": "Bearer {}".format(token.token)},
+            self.userinfo_url, headers={"Authorization": f"Bearer {token.token}"}
         )
+
 
         resp.raise_for_status()
         extra_data = resp.json()
-        login = self.get_provider().sociallogin_from_response(request, extra_data)
-        return login
+        return self.get_provider().sociallogin_from_response(request, extra_data)
 
 
 oauth2_login = OAuth2LoginView.adapter_view(OktaOAuth2Adapter)

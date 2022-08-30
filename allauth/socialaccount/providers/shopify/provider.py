@@ -25,8 +25,7 @@ class ShopifyProvider(OAuth2Provider):
 
     def get_auth_params(self, request, action):
         ret = super(ShopifyProvider, self).get_auth_params(request, action)
-        shop = request.GET.get("shop", None)
-        if shop:
+        if shop := request.GET.get("shop", None):
             ret.update({"shop": shop})
         return ret
 

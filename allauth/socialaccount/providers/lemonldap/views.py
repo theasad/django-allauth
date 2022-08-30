@@ -25,8 +25,9 @@ class LemonLDAPOAuth2Adapter(OAuth2Adapter):
 
     def complete_login(self, request, app, token, response):
         response = requests.post(
-            self.profile_url, headers={"Authorization": "Bearer " + str(token)}
+            self.profile_url, headers={"Authorization": f"Bearer {str(token)}"}
         )
+
         response.raise_for_status()
         extra_data = response.json()
         extra_data["id"] = extra_data["sub"]

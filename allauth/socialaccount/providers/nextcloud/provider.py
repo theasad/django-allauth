@@ -21,8 +21,7 @@ class NextCloudProvider(OAuth2Provider):
         )
 
     def get_default_scope(self):
-        scope = ["read"]
-        return scope
+        return ["read"]
 
 
 provider_classes = [NextCloudProvider]

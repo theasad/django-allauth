@@ -23,7 +23,7 @@ class Provider(object):
         Builds the URL to redirect to when initiating a login for this
         provider.
         """
-        raise NotImplementedError("get_login_url() for " + self.name)
+        raise NotImplementedError(f"get_login_url() for {self.name}")
 
     def get_app(self, request):
         adapter = get_adapter(request)
@@ -112,8 +112,7 @@ class Provider(object):
             addresses.append(EmailAddress(email=email, verified=False, primary=True))
         # Force verified emails
         settings = self.get_settings()
-        verified_email = settings.get("VERIFIED_EMAIL", False)
-        if verified_email:
+        if verified_email := settings.get("VERIFIED_EMAIL", False):
             for address in addresses:
                 address.verified = True
 
@@ -129,10 +128,7 @@ class Provider(object):
 
     @classmethod
     def get_package(cls):
-        pkg = getattr(cls, "package", None)
-        if not pkg:
-            pkg = cls.__module__.rpartition(".")[0]
-        return pkg
+        return getattr(cls, "package", None) or cls.__module__.rpartition(".")[0]
 
 
 class ProviderAccount(object):

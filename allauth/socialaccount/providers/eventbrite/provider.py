@@ -47,17 +47,14 @@ class EventbriteProvider(OAuth2Provider):
         )
 
     def extract_email_addresses(self, data):
-        addresses = []
-        for email in data.get("emails", []):
-            addresses.append(
-                EmailAddress(
-                    email=email.get("email"),
-                    verified=email.get("verfified"),
-                    primary=email.get("primary"),
-                )
+        return [
+            EmailAddress(
+                email=email.get("email"),
+                verified=email.get("verfified"),
+                primary=email.get("primary"),
             )
-
-        return addresses
+            for email in data.get("emails", [])
+        ]
 
 
 provider_classes = [EventbriteProvider]

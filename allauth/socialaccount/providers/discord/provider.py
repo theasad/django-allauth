@@ -9,7 +9,7 @@ class DiscordAccount(ProviderAccount):
         username = self.account.extra_data.get("username")
         discriminator = self.account.extra_data.get("discriminator")
         if username and discriminator:
-            return "{}#{}".format(username, discriminator)
+            return f"{username}#{discriminator}"
         elif username:
             return username
         else:

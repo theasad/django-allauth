@@ -15,7 +15,7 @@ def telegram_login(request):
     provider = providers.registry.by_id(TelegramProvider.id, request)
     data = dict(request.GET.items())
     hash = data.pop("hash")
-    payload = "\n".join(sorted(["{}={}".format(k, v) for k, v in data.items()]))
+    payload = "\n".join(sorted([f"{k}={v}" for k, v in data.items()]))
     token = provider.get_settings()["TOKEN"]
     token_sha256 = hashlib.sha256(token.encode()).digest()
     expected_hash = hmac.new(token_sha256, payload.encode(), hashlib.sha256).hexdigest()

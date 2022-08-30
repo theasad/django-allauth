@@ -9,6 +9,8 @@ UNIQUE_EMAIL = getattr(settings, "ACCOUNT_UNIQUE_EMAIL", True)
 EMAIL_MAX_LENGTH = getattr(settings, "ACCOUNT_EMAIL_MAX_LENGTH", 254)
 
 
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -30,7 +32,6 @@ class Migration(migrations.Migration):
     if not UNIQUE_EMAIL:
         operations += [
             migrations.AlterUniqueTogether(
-                name="emailaddress",
-                unique_together=set([("user", "email")]),
-            ),
+                name="emailaddress", unique_together={("user", "email")}
+            )
         ]

@@ -35,7 +35,7 @@ def login(request):
         "redirect": redirect_url,
     }
     SocialLogin.stash_state(request)
-    return HttpResponseRedirect("%s?%s" % (AUTHORIZE_URL, urlencode(params)))
+    return HttpResponseRedirect(f"{AUTHORIZE_URL}?{urlencode(params)}")
 
 
 @csrf_exempt

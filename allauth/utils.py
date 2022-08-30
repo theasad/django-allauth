@@ -80,20 +80,20 @@ def generate_username_candidate(basename, suffix_length):
     suffix = "".join(
         random.choice(USERNAME_SUFFIX_CHARS[i]) for i in range(suffix_length)
     )
-    return basename[0 : max_length - len(suffix)] + suffix
+    return basename[:max_length - len(suffix)] + suffix
 
 
 def generate_username_candidates(basename):
     from .account.app_settings import USERNAME_MIN_LENGTH
 
-    if len(basename) >= USERNAME_MIN_LENGTH:
-        ret = [basename]
-    else:
-        ret = []
+    ret = [basename] if len(basename) >= USERNAME_MIN_LENGTH else []
     min_suffix_length = max(1, USERNAME_MIN_LENGTH - len(basename))
     max_suffix_length = min(get_username_max_length(), MAX_USERNAME_SUFFIX_LENGTH)
-    for suffix_length in range(min_suffix_length, max_suffix_length):
-        ret.append(generate_username_candidate(basename, suffix_length))
+    ret.extend(
+        generate_username_candidate(basename, suffix_length)
+        for suffix_length in range(min_suffix_length, max_suffix_length)
+    )
+
     return ret
 
 
@@ -109,7 +109,7 @@ def generate_unique_username(txts, regex=None):
     existing_usernames = filter_users_by_username(*candidates).values_list(
         USER_MODEL_USERNAME_FIELD, flat=True
     )
-    existing_usernames = set([n.lower() for n in existing_usernames])
+    existing_usernames = {n.lower() for n in existing_usernames}
     for candidate in candidates:
         if candidate.lower() not in existing_usernames:
             try:
@@ -141,28 +141,26 @@ def email_address_exists(email, exclude_user=None):
         emailaddresses = emailaddresses.exclude(user=exclude_user)
     ret = emailaddresses.filter(email__iexact=email).exists()
     if not ret:
-        email_field = account_settings.USER_MODEL_EMAIL_FIELD
-        if email_field:
+        if email_field := account_settings.USER_MODEL_EMAIL_FIELD:
             users = get_user_model().objects
             if exclude_user:
                 users = users.exclude(pk=exclude_user.pk)
-            ret = users.filter(**{email_field + "__iexact": email}).exists()
+            ret = users.filter(**{f"{email_field}__iexact": email}).exists()
     return ret
 
 
 def import_attribute(path):
     assert isinstance(path, str)
     pkg, attr = path.rsplit(".", 1)
-    ret = getattr(importlib.import_module(pkg), attr)
-    return ret
+    return getattr(importlib.import_module(pkg), attr)
 
 
 def import_callable(path_or_callable):
-    if not hasattr(path_or_callable, "__call__"):
-        ret = import_attribute(path_or_callable)
-    else:
-        ret = path_or_callable
-    return ret
+    return (
+        path_or_callable
+        if hasattr(path_or_callable, "__call__")
+        else import_attribute(path_or_callable)
+    )
 
 
 SERIALIZED_DB_FIELD_PREFIX = "_db_"
@@ -230,9 +228,9 @@ def deserialize_instance(model, data):
                             v = f.from_db_value(v, None, None)
                     except Exception:
                         raise ImproperlyConfigured(
-                            "Unable to auto serialize field '{}', custom"
-                            " serialization override required".format(k)
+                            f"Unable to auto serialize field '{k}', custom serialization override required"
                         )
+
             except FieldDoesNotExist:
                 pass
         setattr(ret, k, v)
@@ -280,14 +278,16 @@ def build_absolute_uri(request, location, protocol=None):
 
         site = Site.objects.get_current()
         bits = urlsplit(location)
-        if not (bits.scheme and bits.netloc):
-            uri = "{proto}://{domain}{url}".format(
+        uri = (
+            location
+            if (bits.scheme and bits.netloc)
+            else "{proto}://{domain}{url}".format(
                 proto=account_settings.DEFAULT_HTTP_PROTOCOL,
                 domain=site.domain,
                 url=location,
             )
-        else:
-            uri = location
+        )
+
     else:
         uri = request.build_absolute_uri(location)
     # NOTE: We only force a protocol if we are instructed to do so
@@ -301,7 +301,7 @@ def build_absolute_uri(request, location, protocol=None):
         protocol = account_settings.DEFAULT_HTTP_PROTOCOL
     # (end NOTE)
     if protocol:
-        uri = protocol + ":" + uri.partition(":")[2]
+        uri = f"{protocol}:" + uri.partition(":")[2]
     return uri
 
 

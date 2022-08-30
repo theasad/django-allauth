@@ -19,7 +19,7 @@ class LinkedInAPI(OAuth):
         fields = providers.registry.by_id(
             LinkedInProvider.id, self.request
         ).get_profile_fields()
-        url = self.url + ":(%s)" % ",".join(fields)
+        url = self.url + f':({",".join(fields)})'
         raw_xml = self.query(url)
         try:
             return self.to_dict(ElementTree.fromstring(raw_xml))
@@ -31,19 +31,17 @@ class LinkedInAPI(OAuth):
         Convert XML structure to dict recursively, repeated keys
         entries are returned as in list containers.
         """
-        children = list(xml)
-        if not children:
+        if not (children := list(xml)):
             return xml.text
-        else:
-            out = {}
-            for node in list(xml):
-                if node.tag in out:
-                    if not isinstance(out[node.tag], list):
-                        out[node.tag] = [out[node.tag]]
-                    out[node.tag].append(self.to_dict(node))
-                else:
-                    out[node.tag] = self.to_dict(node)
-            return out
+        out = {}
+        for node in list(xml):
+            if node.tag in out:
+                if not isinstance(out[node.tag], list):
+                    out[node.tag] = [out[node.tag]]
+                out[node.tag].append(self.to_dict(node))
+            else:
+                out[node.tag] = self.to_dict(node)
+        return out
 
 
 class LinkedInOAuthAdapter(OAuthAdapter):

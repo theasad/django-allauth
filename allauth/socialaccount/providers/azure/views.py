@@ -53,7 +53,7 @@ class AzureOAuth2Adapter(OAuth2Adapter):
         #  u'givenName': u'John', u'id': u'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee'}
 
         profile_data = resp.json()
-        extra_data.update(profile_data)
+        extra_data |= profile_data
 
         return self.get_provider().sociallogin_from_response(request, extra_data)
 

@@ -8,10 +8,7 @@ class SlackAccount(ProviderAccount):
 
     def to_str(self):
         dflt = super(SlackAccount, self).to_str()
-        return "%s (%s)" % (
-            self.account.extra_data.get("name", ""),
-            dflt,
-        )
+        return f'{self.account.extra_data.get("name", "")} ({dflt})'
 
 
 class SlackProvider(OAuth2Provider):
@@ -20,10 +17,7 @@ class SlackProvider(OAuth2Provider):
     account_class = SlackAccount
 
     def extract_uid(self, data):
-        return "%s_%s" % (
-            str(data.get("team").get("id")),
-            str(data.get("user").get("id")),
-        )
+        return f'{str(data.get("team").get("id"))}_{str(data.get("user").get("id"))}'
 
     def extract_common_fields(self, data):
         user = data.get("user", {})

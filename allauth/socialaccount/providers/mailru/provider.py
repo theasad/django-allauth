@@ -7,16 +7,14 @@ class MailRuAccount(ProviderAccount):
         return self.account.extra_data.get("link")
 
     def get_avatar_url(self):
-        ret = None
-        if self.account.extra_data.get("has_pic"):
-            pic_big_url = self.account.extra_data.get("pic_big")
-            pic_small_url = self.account.extra_data.get("pic_small")
-            if pic_big_url:
-                return pic_big_url
-            elif pic_small_url:
-                return pic_small_url
-        else:
-            return ret
+        if not self.account.extra_data.get("has_pic"):
+            return None
+        pic_big_url = self.account.extra_data.get("pic_big")
+        pic_small_url = self.account.extra_data.get("pic_small")
+        if pic_big_url:
+            return pic_big_url
+        elif pic_small_url:
+            return pic_small_url
 
     def to_str(self):
         dflt = super(MailRuAccount, self).to_str()

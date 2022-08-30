@@ -117,8 +117,7 @@ class DefaultSocialAccountAdapter(object):
         connecting a social account.
         """
         assert request.user.is_authenticated
-        url = reverse("socialaccount_connections")
-        return url
+        return reverse("socialaccount_connections")
 
     def validate_disconnect(self, account, accounts):
         """
@@ -130,37 +129,34 @@ class DefaultSocialAccountAdapter(object):
             if not account.user.has_usable_password():
                 raise ValidationError(_("Your account has no password set up."))
             # No email address, no password reset
-            if app_settings.EMAIL_VERIFICATION == EmailVerificationMethod.MANDATORY:
-                if not EmailAddress.objects.filter(
+            if (
+                app_settings.EMAIL_VERIFICATION
+                == EmailVerificationMethod.MANDATORY
+                and not EmailAddress.objects.filter(
                     user=account.user, verified=True
-                ).exists():
-                    raise ValidationError(
-                        _("Your account has no verified e-mail address.")
-                    )
+                ).exists()
+            ):
+                raise ValidationError(
+                    _("Your account has no verified e-mail address.")
+                )
 
     def is_auto_signup_allowed(self, request, sociallogin):
         # If email is specified, check for duplicate and if so, no auto signup.
         auto_signup = app_settings.AUTO_SIGNUP
         if auto_signup:
-            email = user_email(sociallogin.user)
-            # Let's check if auto_signup is really possible...
-            if email:
-                if account_settings.UNIQUE_EMAIL:
-                    if email_address_exists(email):
-                        # Oops, another user already has this address.
-                        # We cannot simply connect this social account
-                        # to the existing user. Reason is that the
-                        # email adress may not be verified, meaning,
-                        # the user may be a hacker that has added your
-                        # email address to their account in the hope
-                        # that you fall in their trap.  We cannot
-                        # check on 'email_address.verified' either,
-                        # because 'email_address' is not guaranteed to
-                        # be verified.
-                        auto_signup = False
-                        # FIXME: We redirect to signup form -- user will
-                        # see email address conflict only after posting
-                        # whereas we detected it here already.
+            if email := user_email(sociallogin.user):
+                if account_settings.UNIQUE_EMAIL and email_address_exists(email):
+                    # Oops, another user already has this address.
+                    # We cannot simply connect this social account
+                    # to the existing user. Reason is that the
+                    # email adress may not be verified, meaning,
+                    # the user may be a hacker that has added your
+                    # email address to their account in the hope
+                    # that you fall in their trap.  We cannot
+                    # check on 'email_address.verified' either,
+                    # because 'email_address' is not guaranteed to
+                    # be verified.
+                    auto_signup = False
             elif app_settings.EMAIL_REQUIRED:
                 # Nope, email is required and we don't have it yet...
                 auto_signup = False
@@ -177,13 +173,12 @@ class DefaultSocialAccountAdapter(object):
 
     def get_signup_form_initial_data(self, sociallogin):
         user = sociallogin.user
-        initial = {
+        return {
             "email": user_email(user) or "",
             "username": user_username(user) or "",
             "first_name": user_field(user, "first_name") or "",
             "last_name": user_field(user, "last_name") or "",
         }
-        return initial
 
     def deserialize_instance(self, model, data):
         return deserialize_instance(model, data)
@@ -195,8 +190,7 @@ class DefaultSocialAccountAdapter(object):
         # NOTE: Avoid loading models at top due to registry boot...
         from allauth.socialaccount.models import SocialApp
 
-        config = app_settings.PROVIDERS.get(provider, {}).get("APP")
-        if config:
+        if config := app_settings.PROVIDERS.get(provider, {}).get("APP"):
             app = SocialApp(provider=provider)
             for field in ["client_id", "secret", "key", "certificate_key"]:
                 setattr(app, field, config.get(field))

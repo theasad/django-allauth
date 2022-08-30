@@ -54,9 +54,7 @@ class mocked_response:
 
         def mockable_request(f):
             def new_f(*args, **kwargs):
-                if self.responses:
-                    return self.responses.pop(0)
-                return f(*args, **kwargs)
+                return self.responses.pop(0) if self.responses else f(*args, **kwargs)
 
             return new_f
 

@@ -26,8 +26,9 @@ class UntappdProvider(OAuth2Provider):
         params = super(UntappdProvider, self).get_auth_params(request, action)
         # Untappd uses redirect_url instead of redirect_uri
         params["redirect_url"] = request.build_absolute_uri(
-            reverse(self.id + "_callback")
+            reverse(f"{self.id}_callback")
         )
+
         return params
 
     def extract_uid(self, data):
@@ -41,14 +42,13 @@ class UntappdProvider(OAuth2Provider):
         )
 
     def extract_email_addresses(self, data):
-        ret = [
+        return [
             EmailAddress(
                 email=data["response"]["user"]["settings"]["email_address"],
                 verified=True,
                 primary=True,
             )
         ]
-        return ret
 
 
 provider_classes = [UntappdProvider]

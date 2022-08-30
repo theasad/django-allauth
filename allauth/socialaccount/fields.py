@@ -20,13 +20,12 @@ class JSONField(models.TextField):
         """
         if self.blank and not value:
             return None
-        if isinstance(value, str):
-            try:
-                return json.loads(value)
-            except Exception as e:
-                raise ValidationError(str(e))
-        else:
+        if not isinstance(value, str):
             return value
+        try:
+            return json.loads(value)
+        except Exception as e:
+            raise ValidationError(str(e))
 
     def validate(self, value, model_instance):
         """Check value is a valid JSON string, raise ValidationError on

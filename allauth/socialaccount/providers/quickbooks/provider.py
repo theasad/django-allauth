@@ -13,7 +13,7 @@ class QuickBooksAccount(ProviderAccount):
         first_name = self.account.extra_data.get("givenName", None)
         last_name = self.account.extra_data.get("familyName", None)
         if first_name and last_name:
-            name = first_name + " " + last_name
+            name = f"{first_name} {last_name}"
         return name
 
 
@@ -38,8 +38,7 @@ class QuickBooksOAuth2Provider(OAuth2Provider):
             "email",
             "emailVerified",
         ]
-        fields = self.get_settings().get("PROFILE_FIELDS", default_fields)
-        return fields
+        return self.get_settings().get("PROFILE_FIELDS", default_fields)
 
     def get_default_scope(self):
         scope = [

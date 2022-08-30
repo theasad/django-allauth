@@ -27,8 +27,7 @@ def _openid_consumer(request, provider, endpoint):
     server_settings = provider.get_server_settings(endpoint)
     stateless = server_settings.get("stateless", False)
     store = None if stateless else DBOpenIDStore()
-    client = consumer.Consumer(JSONSafeSession(request.session), store)
-    return client
+    return consumer.Consumer(JSONSafeSession(request.session), store)
 
 
 class OpenIDLoginView(View):

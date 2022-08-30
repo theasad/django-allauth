@@ -5,7 +5,7 @@ from allauth.socialaccount.providers.oauth2.provider import OAuth2Provider
 class ExistAccount(ProviderAccount):
     def get_profile_url(self):
         username = self.account.extra_data.get("username")
-        return "https://exist.io/api/1/users/{}/profile/".format(username)
+        return f"https://exist.io/api/1/users/{username}/profile/"
 
     def get_avatar_url(self):
         return self.account.extra_data.get("avatar")

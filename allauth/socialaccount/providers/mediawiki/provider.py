@@ -16,9 +16,11 @@ class MediaWikiAccount(ProviderAccount):
             "USERPAGE_TEMPLATE", "https://meta.wikimedia.org/wiki/User:{username}"
         )
         username = self.account.extra_data.get("username")
-        if not username:
-            return None
-        return userpage.format(username=username.replace(" ", "_"))
+        return (
+            userpage.format(username=username.replace(" ", "_"))
+            if username
+            else None
+        )
 
     def to_str(self):
         dflt = super(MediaWikiAccount, self).to_str()
@@ -32,9 +34,7 @@ class MediaWikiProvider(OAuth2Provider):
 
     @staticmethod
     def _get_email(data: dict) -> Optional[str]:
-        if data.get("confirmed_email"):
-            return data.get("email")
-        return None
+        return data.get("email") if data.get("confirmed_email") else None
 
     def extract_uid(self, data):
         return str(data["sub"])

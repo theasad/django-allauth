@@ -42,9 +42,7 @@ class UntappdOAuth2Client(OAuth2Client):
             data=data,
             headers=headers,
         )
-        access_token = None
-        if resp.status_code == 200:
-            access_token = resp.json()["response"]
+        access_token = resp.json()["response"] if resp.status_code == 200 else None
         if not access_token or "access_token" not in access_token:
-            raise OAuth2Error("Error retrieving access token: %s" % resp.content)
+            raise OAuth2Error(f"Error retrieving access token: {resp.content}")
         return access_token

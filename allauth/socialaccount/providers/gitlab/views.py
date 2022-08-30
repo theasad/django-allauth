@@ -30,7 +30,7 @@ def _check_errors(response):
         error = data.get("error", "") or response.status_code
         desc = data.get("error_description", "") or data.get("message", "")
 
-        raise OAuth2Error("GitLab error: %s (%s)" % (error, desc))
+        raise OAuth2Error(f"GitLab error: {error} ({desc})")
 
     # The expected output from the API follows this format:
     # {"id": 12345, ...}

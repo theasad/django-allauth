@@ -34,9 +34,7 @@ class TrainingPeaksTests(OAuth2TestsMixin, TestCase):
         )  # noqa
 
     def get_login_response_json(self, with_refresh_token=True):
-        rtoken = ""
-        if with_refresh_token:
-            rtoken = ',"refresh_token": "testrf"'
+        rtoken = ',"refresh_token": "testrf"' if with_refresh_token else ""
         return (
             """{
                 "access_token" : "testac",

@@ -29,8 +29,7 @@ class DisqusOAuth2Adapter(OAuth2Adapter):
 
         extra_data = resp.json().get("response")
 
-        login = self.get_provider().sociallogin_from_response(request, extra_data)
-        return login
+        return self.get_provider().sociallogin_from_response(request, extra_data)
 
 
 oauth2_login = OAuth2LoginView.adapter_view(DisqusOAuth2Adapter)

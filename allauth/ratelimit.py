@@ -16,7 +16,7 @@ def parse(rate):
         amount = int(amount)
         duration_map = {"s": 1, "m": 60, "h": 3600, "d": 86400}
         if duration not in duration_map:
-            raise ValueError("Invalid duration: %s" % duration)
+            raise ValueError(f"Invalid duration: {duration}")
         duration = duration_map[duration]
         ret = Rate(amount, duration)
     return ret
@@ -47,17 +47,14 @@ def consume(request, *, action, key=None, amount=None, duration=None, user=None)
     allowed = True
     from allauth.account import app_settings
 
-    rate = app_settings.RATE_LIMITS.get(action)
-    if rate:
+    if rate := app_settings.RATE_LIMITS.get(action):
         rate = parse(rate)
         if not amount:
             amount = rate.amount
         if not duration:
             duration = rate.duration
 
-    if request.method == "GET" or not amount or not duration:
-        pass
-    else:
+    if request.method != "GET" and amount and duration:
         cache_key = _cache_key(request, action=action, key=key, user=user)
         history = cache.get(cache_key, [])
         now = time.time()
@@ -74,4 +71,4 @@ def consume_or_429(request, *args, **kwargs):
     from allauth.account import app_settings
 
     if not consume(request, *args, **kwargs):
-        return render(request, "429." + app_settings.TEMPLATE_EXTENSION, status=429)
+        return render(request, f"429.{app_settings.TEMPLATE_EXTENSION}", status=429)

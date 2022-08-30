@@ -26,7 +26,7 @@ class LinkedInAccount(ProviderAccount):
         first_name = self.account.extra_data.get("first-name", None)
         last_name = self.account.extra_data.get("last-name", None)
         if first_name and last_name:
-            name = first_name + " " + last_name
+            name = f"{first_name} {last_name}"
         return name
 
 
@@ -52,8 +52,7 @@ class LinkedInProvider(OAuthProvider):
             # picture-urls::(original) is higher res
             "public-profile-url",
         ]
-        fields = self.get_settings().get("PROFILE_FIELDS", default_fields)
-        return fields
+        return self.get_settings().get("PROFILE_FIELDS", default_fields)
 
     def extract_uid(self, data):
         return data["id"]

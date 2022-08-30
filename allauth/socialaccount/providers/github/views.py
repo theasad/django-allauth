@@ -26,7 +26,7 @@ class GitHubOAuth2Adapter(OAuth2Adapter):
     emails_url = "{0}/user/emails".format(api_url)
 
     def complete_login(self, request, app, token, **kwargs):
-        headers = {"Authorization": "token {}".format(token.token)}
+        headers = {"Authorization": f"token {token.token}"}
         resp = requests.get(self.profile_url, headers=headers)
         resp.raise_for_status()
         extra_data = resp.json()
@@ -41,10 +41,9 @@ class GitHubOAuth2Adapter(OAuth2Adapter):
         emails = resp.json()
         if resp.status_code == 200 and emails:
             email = emails[0]
-            primary_emails = [
+            if primary_emails := [
                 e for e in emails if not isinstance(e, dict) or e.get("primary")
-            ]
-            if primary_emails:
+            ]:
                 email = primary_emails[0]
             if isinstance(email, dict):
                 email = email.get("email", "")

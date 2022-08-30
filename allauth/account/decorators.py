@@ -33,6 +33,4 @@ def verified_email_required(
 
         return _wrapped_view
 
-    if function:
-        return decorator(function)
-    return decorator
+    return decorator(function) if function else decorator

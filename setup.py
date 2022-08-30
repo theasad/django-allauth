@@ -73,18 +73,12 @@ def find_package_data(
                     if fnmatchcase(name, pattern) or fn.lower() == pattern.lower():
                         bad_name = True
                         if show_ignored:
-                            print(
-                                "Directory %s ignored by pattern %s" % (fn, pattern),
-                                file=sys.stderr,
-                            )
+                            print(f"Directory {fn} ignored by pattern {pattern}", file=sys.stderr)
                         break
                 if bad_name:
                     continue
                 if os.path.isfile(os.path.join(fn, "__init__.py")) and not prefix:
-                    if not package:
-                        new_package = name
-                    else:
-                        new_package = package + "." + name
+                    new_package = f"{package}.{name}" if package else name
                     stack.append((fn, "", new_package, False))
                 else:
                     stack.append((fn, prefix + name + "/", package, only_in_packages))
@@ -95,10 +89,7 @@ def find_package_data(
                     if fnmatchcase(name, pattern) or fn.lower() == pattern.lower():
                         bad_name = True
                         if show_ignored:
-                            print(
-                                "File %s ignored by pattern %s" % (fn, pattern),
-                                file=sys.stderr,
-                            )
+                            print(f"File {fn} ignored by pattern {pattern}", file=sys.stderr)
                         break
                 if bad_name:
                     continue

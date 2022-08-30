@@ -33,9 +33,7 @@ class KakaoProvider(OAuth2Provider):
     def extract_email_addresses(self, data):
         ret = []
         data = data.get("kakao_account", {})
-        email = data.get("email")
-
-        if email:
+        if email := data.get("email"):
             verified = data.get("is_email_verified")
             # data['is_email_verified'] imply the email address is
             # verified

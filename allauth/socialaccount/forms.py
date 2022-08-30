@@ -13,14 +13,13 @@ class SignupForm(BaseSignupForm):
     def __init__(self, *args, **kwargs):
         self.sociallogin = kwargs.pop("sociallogin")
         initial = get_adapter().get_signup_form_initial_data(self.sociallogin)
-        kwargs.update(
-            {
-                "initial": initial,
-                "email_required": kwargs.get(
-                    "email_required", app_settings.EMAIL_REQUIRED
-                ),
-            }
-        )
+        kwargs |= {
+            "initial": initial,
+            "email_required": kwargs.get(
+                "email_required", app_settings.EMAIL_REQUIRED
+            ),
+        }
+
         super(SignupForm, self).__init__(*args, **kwargs)
 
     def save(self, request):
@@ -54,8 +53,7 @@ class DisconnectForm(forms.Form):
 
     def clean(self):
         cleaned_data = super(DisconnectForm, self).clean()
-        account = cleaned_data.get("account")
-        if account:
+        if account := cleaned_data.get("account"):
             get_adapter(self.request).validate_disconnect(account, self.accounts)
         return cleaned_data
 

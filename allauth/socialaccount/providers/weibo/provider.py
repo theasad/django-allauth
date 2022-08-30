@@ -24,10 +24,10 @@ class WeiboProvider(OAuth2Provider):
     account_class = WeiboAccount
 
     def extract_uid(self, data):
-        ret = data.get("idstr")
-        if not ret:
+        if ret := data.get("idstr"):
+            return ret
+        else:
             raise ProviderException("Missing 'idstr'")
-        return ret
 
     def extract_common_fields(self, data):
         return dict(username=data.get("screen_name"), name=data.get("name"))

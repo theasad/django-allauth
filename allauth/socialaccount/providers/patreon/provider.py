@@ -2,6 +2,7 @@
 Provider for Patreon
 """
 
+
 from django.conf import settings
 
 from allauth.socialaccount.providers.base import ProviderAccount
@@ -13,7 +14,7 @@ API_VERSION = (
     .get("patreon", {})
     .get("VERSION", "v1")
 )
-USE_API_V2 = True if API_VERSION == "v2" else False
+USE_API_V2 = API_VERSION == "v2"
 API_URL = "https://www.patreon.com/api/oauth2/" + (API_VERSION if USE_API_V2 else "api")
 
 

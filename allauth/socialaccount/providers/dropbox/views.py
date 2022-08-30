@@ -18,9 +18,9 @@ class DropboxOAuth2Adapter(OAuth2Adapter):
 
     def complete_login(self, request, app, token, **kwargs):
         response = requests.post(
-            self.profile_url,
-            headers={"Authorization": "Bearer %s" % (token.token,)},
+            self.profile_url, headers={"Authorization": f"Bearer {token.token}"}
         )
+
         response.raise_for_status()
         return self.get_provider().sociallogin_from_response(request, response.json())
 

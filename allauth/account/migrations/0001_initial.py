@@ -9,6 +9,8 @@ from django.db import migrations, models
 UNIQUE_EMAIL = getattr(settings, "ACCOUNT_UNIQUE_EMAIL", True)
 
 
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -103,7 +105,6 @@ class Migration(migrations.Migration):
     if not UNIQUE_EMAIL:
         operations += [
             migrations.AlterUniqueTogether(
-                name="emailaddress",
-                unique_together=set([("user", "email")]),
-            ),
+                name="emailaddress", unique_together={("user", "email")}
+            )
         ]

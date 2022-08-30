@@ -14,8 +14,7 @@ class XingAPI(OAuth):
     url = "https://api.xing.com/v1/users/me.json"
 
     def get_user_info(self):
-        user = json.loads(self.query(self.url))
-        return user
+        return json.loads(self.query(self.url))
 
 
 class XingOAuthAdapter(OAuthAdapter):

@@ -29,9 +29,9 @@ class PatreonOAuth2Adapter(OAuth2Adapter):
 
     def complete_login(self, request, app, token, **kwargs):
         resp = requests.get(
-            self.profile_url,
-            headers={"Authorization": "Bearer " + token.token},
+            self.profile_url, headers={"Authorization": f"Bearer {token.token}"}
         )
+
         extra_data = resp.json().get("data")
 
         if USE_API_V2:
@@ -43,15 +43,13 @@ class PatreonOAuth2Adapter(OAuth2Adapter):
                     "currently_entitled_tiers&fields%5Btier%5D=title"
                 ).format(API_URL, member_id)
                 resp_member = requests.get(
-                    member_url,
-                    headers={"Authorization": "Bearer " + token.token},
+                    member_url, headers={"Authorization": f"Bearer {token.token}"}
                 )
+
                 pledge_title = resp_member.json()["included"][0]["attributes"]["title"]
                 extra_data["pledge_level"] = pledge_title
             except (KeyError, IndexError):
                 extra_data["pledge_level"] = None
-                pass
-
         return self.get_provider().sociallogin_from_response(request, extra_data)
 
 

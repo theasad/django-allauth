@@ -4,16 +4,13 @@ from allauth.socialaccount.providers.oauth2.provider import OAuth2Provider
 
 class StravaAccount(ProviderAccount):
     def get_profile_url(self):
-        id = self.account.extra_data.get("id")
-        if id:
-            return "https://www.strava.com/athletes/{}".format(id)
+        if id := self.account.extra_data.get("id"):
+            return f"https://www.strava.com/athletes/{id}"
         return None
 
     def get_avatar_url(self):
         avatar = self.account.extra_data.get("profile")
-        if avatar and avatar != "avatar/athlete/large.png":
-            return avatar
-        return None
+        return avatar if avatar and avatar != "avatar/athlete/large.png" else None
 
     def to_str(self):
         name = super(StravaAccount, self).to_str()

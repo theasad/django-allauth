@@ -11,9 +11,7 @@ class YahooAccount(ProviderAccount):
             self.account.extra_data.get("given_name", ""),
             self.account.extra_data.get("family_name", ""),
         )
-        if name.strip() != "":
-            return name
-        return super(YahooAccount, self).to_str()
+        return name if name.strip() != "" else super(YahooAccount, self).to_str()
 
 
 class YahooProvider(OAuth2Provider):

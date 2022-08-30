@@ -5,8 +5,7 @@ from allauth.socialaccount.providers.oauth2.provider import OAuth2Provider
 class RedditAccount(ProviderAccount):
     def to_str(self):
         dflt = super(RedditAccount, self).to_str()
-        name = self.account.extra_data.get("name", dflt)
-        return name
+        return self.account.extra_data.get("name", dflt)
 
 
 class RedditProvider(OAuth2Provider):
@@ -21,8 +20,7 @@ class RedditProvider(OAuth2Provider):
         return dict(username=data.get("name"))
 
     def get_default_scope(self):
-        scope = ["identity"]
-        return scope
+        return ["identity"]
 
 
 provider_classes = [RedditProvider]

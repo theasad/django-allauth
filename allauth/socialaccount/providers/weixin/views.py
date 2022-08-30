@@ -19,10 +19,9 @@ class WeixinOAuth2Adapter(OAuth2Adapter):
     @property
     def authorize_url(self):
         settings = self.get_provider().get_settings()
-        url = settings.get(
+        return settings.get(
             "AUTHORIZE_URL", "https://open.weixin.qq.com/connect/qrconnect"
         )
-        return url
 
     def complete_login(self, request, app, token, **kwargs):
         openid = kwargs.get("response", {}).get("openid")
@@ -31,8 +30,7 @@ class WeixinOAuth2Adapter(OAuth2Adapter):
             params={"access_token": token.token, "openid": openid},
         )
         extra_data = resp.json()
-        nickname = extra_data.get("nickname")
-        if nickname:
+        if nickname := extra_data.get("nickname"):
             extra_data["nickname"] = nickname.encode("raw_unicode_escape").decode(
                 "utf-8"
             )

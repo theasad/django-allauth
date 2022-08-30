@@ -35,7 +35,7 @@ class ProviderRegistry(object):
         if not self.loaded:
             for app in settings.INSTALLED_APPS:
                 try:
-                    provider_module = importlib.import_module(app + ".provider")
+                    provider_module = importlib.import_module(f"{app}.provider")
                 except ImportError:
                     pass
                 else:

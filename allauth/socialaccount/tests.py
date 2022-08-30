@@ -57,7 +57,7 @@ class OAuthTestsMixin(object):
     def test_login(self):
         resp_mocks = self.get_mocked_response()
         if resp_mocks is None:
-            warnings.warn("Cannot test provider %s, no oauth mock" % self.provider.id)
+            warnings.warn(f"Cannot test provider {self.provider.id}, no oauth mock")
             return
         resp = self.login(resp_mocks)
         self.assertRedirects(resp, reverse("socialaccount_signup"))
@@ -89,7 +89,7 @@ class OAuthTestsMixin(object):
     def test_auto_signup(self):
         resp_mocks = self.get_mocked_response()
         if not resp_mocks:
-            warnings.warn("Cannot test provider %s, no oauth mock" % self.provider.id)
+            warnings.warn(f"Cannot test provider {self.provider.id}, no oauth mock")
             return
         resp = self.login(resp_mocks)
         self.assertRedirects(resp, "/accounts/profile/", fetch_redirect_response=False)
@@ -97,20 +97,20 @@ class OAuthTestsMixin(object):
 
     def login(self, resp_mocks, process="login"):
         with mocked_response(
-            MockedResponse(
-                200,
-                "oauth_token=token&oauth_token_secret=psst",
-                {"content-type": "text/html"},
-            )
-        ):
+                MockedResponse(
+                    200,
+                    "oauth_token=token&oauth_token_secret=psst",
+                    {"content-type": "text/html"},
+                )
+            ):
             resp = self.client.post(
-                reverse(self.provider.id + "_login")
-                + "?"
+                (reverse(f"{self.provider.id}_login") + "?")
                 + urlencode(dict(process=process))
             )
+
         p = urlparse(resp["location"])
         q = parse_qs(p.query)
-        complete_url = reverse(self.provider.id + "_callback")
+        complete_url = reverse(f"{self.provider.id}_callback")
         self.assertGreater(q["oauth_callback"][0].find(complete_url), 0)
         with mocked_response(self.get_access_token_response(), *resp_mocks):
             resp = self.client.get(complete_url)
@@ -124,21 +124,21 @@ class OAuthTestsMixin(object):
         )
 
     def test_authentication_error(self):
-        resp = self.client.get(reverse(self.provider.id + "_callback"))
+        resp = self.client.get(reverse(f"{self.provider.id}_callback"))
         self.assertTemplateUsed(
             resp,
-            "socialaccount/authentication_error.%s"
-            % getattr(settings, "ACCOUNT_TEMPLATE_EXTENSION", "html"),
+            f'socialaccount/authentication_error.{getattr(settings, "ACCOUNT_TEMPLATE_EXTENSION", "html")}',
         )
 
 
 # For backward-compatibility with third-party provider tests that call
 # create_oauth_tests() rather than using the mixin directly.
 def create_oauth_tests(provider):
+
     class Class(OAuthTestsMixin, TestCase):
         provider_id = provider.id
 
-    Class.__name__ = "OAuthTests_" + provider.id
+    Class.__name__ = f"OAuthTests_{provider.id}"
     return Class
 
 
@@ -149,9 +149,7 @@ class OAuth2TestsMixin(object):
         pass
 
     def get_login_response_json(self, with_refresh_token=True):
-        rt = ""
-        if with_refresh_token:
-            rt = ',"refresh_token": "testrf"'
+        rt = ',"refresh_token": "testrf"' if with_refresh_token else ""
         return (
             """{
             "uid":"weibo",
@@ -169,7 +167,7 @@ class OAuth2TestsMixin(object):
     def test_login(self):
         resp_mock = self.get_mocked_response()
         if not resp_mock:
-            warnings.warn("Cannot test provider %s, no oauth mock" % self.provider.id)
+            warnings.warn(f"Cannot test provider {self.provider.id}, no oauth mock")
             return
         resp = self.login(
             resp_mock,
@@ -225,22 +223,18 @@ class OAuth2TestsMixin(object):
 
     def login(self, resp_mock, process="login", with_refresh_token=True):
         resp = self.client.post(
-            reverse(self.provider.id + "_login")
-            + "?"
+            (reverse(f"{self.provider.id}_login") + "?")
             + urlencode(dict(process=process))
         )
+
         p = urlparse(resp["location"])
         q = parse_qs(p.query)
-        complete_url = reverse(self.provider.id + "_callback")
+        complete_url = reverse(f"{self.provider.id}_callback")
         self.assertGreater(q["redirect_uri"][0].find(complete_url), 0)
         response_json = self.get_login_response_json(
             with_refresh_token=with_refresh_token
         )
-        if isinstance(resp_mock, list):
-            resp_mocks = resp_mock
-        else:
-            resp_mocks = [resp_mock]
-
+        resp_mocks = resp_mock if isinstance(resp_mock, list) else [resp_mock]
         with mocked_response(
             MockedResponse(200, response_json, {"content-type": "application/json"}),
             *resp_mocks,
@@ -252,21 +246,21 @@ class OAuth2TestsMixin(object):
         return {"code": "test", "state": q["state"][0]}
 
     def test_authentication_error(self):
-        resp = self.client.get(reverse(self.provider.id + "_callback"))
+        resp = self.client.get(reverse(f"{self.provider.id}_callback"))
         self.assertTemplateUsed(
             resp,
-            "socialaccount/authentication_error.%s"
-            % getattr(settings, "ACCOUNT_TEMPLATE_EXTENSION", "html"),
+            f'socialaccount/authentication_error.{getattr(settings, "ACCOUNT_TEMPLATE_EXTENSION", "html")}',
         )
 
 
 # For backward-compatibility with third-party provider tests that call
 # create_oauth2_tests() rather than using the mixin directly.
 def create_oauth2_tests(provider):
+
     class Class(OAuth2TestsMixin, TestCase):
         provider_id = provider.id
 
-    Class.__name__ = "OAuth2Tests_" + provider.id
+    Class.__name__ = f"OAuth2Tests_{provider.id}"
     return Class
 
 
@@ -640,8 +634,8 @@ class SocialAccountTests(TestCase):
         sa = SocialAccount(user=user)
         self.assertEqual("test", str(sa))
 
-    def socialaccount_str_custom_formatter(socialaccount):
-        return "A custom str builder for {}".format(socialaccount.user)
+    def socialaccount_str_custom_formatter(self):
+        return f"A custom str builder for {self.user}"
 
     @override_settings(
         SOCIALACCOUNT_SOCIALACCOUNT_STR=socialaccount_str_custom_formatter

@@ -9,6 +9,8 @@ from allauth import app_settings
 from allauth.socialaccount.providers import registry
 
 
+
+
 class Migration(migrations.Migration):
 
     dependencies = (
@@ -54,11 +56,15 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "last_login",
-                    models.DateTimeField(auto_now=True, verbose_name="last login"),
+                    models.DateTimeField(
+                        auto_now=True, verbose_name="last login"
+                    ),
                 ),
                 (
                     "date_joined",
-                    models.DateTimeField(auto_now_add=True, verbose_name="date joined"),
+                    models.DateTimeField(
+                        auto_now_add=True, verbose_name="date joined"
+                    ),
                 ),
                 (
                     "extra_data",
@@ -128,7 +134,10 @@ class Migration(migrations.Migration):
             ]
             + (
                 [
-                    ("sites", models.ManyToManyField(to="sites.Site", blank=True)),
+                    (
+                        "sites",
+                        models.ManyToManyField(to="sites.Site", blank=True),
+                    ),
                 ]
                 if app_settings.SITES_ENABLED
                 else []
@@ -193,11 +202,9 @@ class Migration(migrations.Migration):
             bases=(models.Model,),
         ),
         migrations.AlterUniqueTogether(
-            name="socialtoken",
-            unique_together=set([("app", "account")]),
+            name="socialtoken", unique_together={("app", "account")}
         ),
         migrations.AlterUniqueTogether(
-            name="socialaccount",
-            unique_together=set([("provider", "uid")]),
+            name="socialaccount", unique_together={("provider", "uid")}
         ),
     ]

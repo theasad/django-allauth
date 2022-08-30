@@ -52,15 +52,14 @@ class OAuth2Adapter(object):
         raise NotImplementedError
 
     def get_callback_url(self, request, app):
-        callback_url = reverse(self.provider_id + "_callback")
+        callback_url = reverse(f"{self.provider_id}_callback")
         protocol = self.redirect_uri_protocol
         return build_absolute_uri(request, callback_url, protocol)
 
     def parse_token(self, data):
         token = SocialToken(token=data["access_token"])
         token.token_secret = data.get("refresh_token", "")
-        expires_in = data.get(self.expires_in_key, None)
-        if expires_in:
+        if expires_in := data.get(self.expires_in_key, None):
             token.expires_at = timezone.now() + timedelta(seconds=int(expires_in))
         return token
 
@@ -87,7 +86,7 @@ class OAuth2View(object):
         callback_url = self.adapter.get_callback_url(request, app)
         provider = self.adapter.get_provider()
         scope = provider.get_scope(request)
-        client = self.adapter.client_class(
+        return self.adapter.client_class(
             self.request,
             app.client_id,
             app.secret,
@@ -99,7 +98,6 @@ class OAuth2View(object):
             headers=self.adapter.headers,
             basic_auth=self.adapter.basic_auth,
         )
-        return client
 
 
 class OAuth2LoginView(OAuthLoginMixin, OAuth2View):

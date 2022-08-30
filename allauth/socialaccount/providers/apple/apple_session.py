@@ -29,8 +29,7 @@ def persist_apple_session(request, response):
     request.apple_login_session.save()
     kwargs = {}
     if django.VERSION >= (2, 1):
-        samesite = getattr(settings, "SESSION_COOKIE_SAMESITE", None)
-        if samesite:
+        if samesite := getattr(settings, "SESSION_COOKIE_SAMESITE", None):
             kwargs["samesite"] = samesite
     response.set_cookie(
         APPLE_SESSION_COOKIE_NAME,

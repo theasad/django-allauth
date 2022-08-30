@@ -8,8 +8,7 @@ from allauth.socialaccount.providers.oauth2.provider import OAuth2Provider
 
 def _extract_name_field(data, field_name):
     ret = ""
-    v = data.get(field_name, {})
-    if v:
+    if v := data.get(field_name, {}):
         if isinstance(v, str):
             # Old V1 data
             ret = v
@@ -33,11 +32,12 @@ def _extract_email(data):
     {'elements': [{'handle': 'urn:li:emailAddress:319371470',
                'handle~': {'emailAddress': 'raymond.penners@intenct.nl'}}]}
     """
-    ret = ""
     elements = data.get("elements", [])
-    if len(elements) > 0:
-        ret = elements[0].get("handle~", {}).get("emailAddress", "")
-    return ret
+    return (
+        elements[0].get("handle~", {}).get("emailAddress", "")
+        if len(elements) > 0
+        else ""
+    )
 
 
 class LinkedInOAuth2Account(ProviderAccount):
@@ -75,7 +75,7 @@ class LinkedInOAuth2Account(ProviderAccount):
             .get("elements", [])
         )
         for single_element in profile_elements:
-            if not req_auth_method == single_element["authorizationMethod"]:
+            if req_auth_method != single_element["authorizationMethod"]:
                 continue
             # Get the dimensions from the payload
             image_data = (
@@ -88,13 +88,11 @@ class LinkedInOAuth2Account(ProviderAccount):
             width, height = image_data["width"], image_data["height"]
             if not width or not height:
                 continue
-            if not width == req_size[0] or not height == req_size[1]:
+            if width != req_size[0] or height != req_size[1]:
                 continue
-            # Get the uri since actual size matches the requested size.
-            to_return = single_element.get("identifiers", [{},])[
+            if to_return := single_element.get("identifiers", [{},])[
                 0
-            ].get("identifier")
-            if to_return:
+            ].get("identifier"):
                 return to_return
         return super(LinkedInOAuth2Account, self).get_avatar_url()
 
@@ -124,8 +122,7 @@ class LinkedInOAuth2Provider(OAuth2Provider):
             #
             # 'profilePicture(displayImage~:playableStreams)'
         ]
-        fields = self.get_settings().get("PROFILE_FIELDS", default_fields)
-        return fields
+        return self.get_settings().get("PROFILE_FIELDS", default_fields)
 
     def get_default_scope(self):
         scope = ["r_liteprofile"]

@@ -8,24 +8,22 @@ from allauth.socialaccount.providers.base import Provider
 
 class OAuth2Provider(Provider):
     def get_login_url(self, request, **kwargs):
-        url = reverse(self.id + "_login")
+        url = reverse(f"{self.id}_login")
         if kwargs:
-            url = url + "?" + urlencode(kwargs)
+            url = f"{url}?{urlencode(kwargs)}"
         return url
 
     def get_auth_params(self, request, action):
         settings = self.get_settings()
         ret = dict(settings.get("AUTH_PARAMS", {}))
-        dynamic_auth_params = request.GET.get("auth_params", None)
-        if dynamic_auth_params:
-            ret.update(dict(parse_qsl(dynamic_auth_params)))
+        if dynamic_auth_params := request.GET.get("auth_params", None):
+            ret |= dict(parse_qsl(dynamic_auth_params))
         return ret
 
     def get_scope(self, request):
         settings = self.get_settings()
         scope = list(settings.get("SCOPE", self.get_default_scope()))
-        dynamic_scope = request.GET.get("scope", None)
-        if dynamic_scope:
+        if dynamic_scope := request.GET.get("scope", None):
             scope.extend(dynamic_scope.split(","))
         return scope
 

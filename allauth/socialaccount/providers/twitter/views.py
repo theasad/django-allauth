@@ -20,8 +20,7 @@ class TwitterAPI(OAuth):
     url = _base_url + "?include_email=true" if QUERY_EMAIL else _base_url
 
     def get_user_info(self):
-        user = json.loads(self.query(self.url))
-        return user
+        return json.loads(self.query(self.url))
 
 
 class TwitterOAuthAdapter(OAuthAdapter):

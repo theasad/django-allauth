@@ -15,7 +15,7 @@ from .provider import ShopifyProvider
 
 class ShopifyTests(create_oauth2_tests(registry.by_id(ShopifyProvider.id))):
     def _complete_shopify_login(self, q, resp, resp_mock, with_refresh_token):
-        complete_url = reverse(self.provider.id + "_callback")
+        complete_url = reverse(f"{self.provider.id}_callback")
         self.assertGreater(q["redirect_uri"][0].find(complete_url), 0)
         response_json = self.get_login_response_json(
             with_refresh_token=with_refresh_token
@@ -35,11 +35,10 @@ class ShopifyTests(create_oauth2_tests(registry.by_id(ShopifyProvider.id))):
         return resp
 
     def login(self, resp_mock, process="login", with_refresh_token=True):
-        url = (
-            reverse(self.provider.id + "_login")
-            + "?"
-            + urlencode({"process": process, "shop": "test"})
+        url = (reverse(f"{self.provider.id}_login") + "?") + urlencode(
+            {"process": process, "shop": "test"}
         )
+
         resp = self.client.post(url)
         self.assertEqual(resp.status_code, 302)
         p = urlparse(resp["location"])
@@ -74,16 +73,17 @@ class ShopifyEmbeddedTests(ShopifyTests):
 
     def login(self, resp_mock, process="login", with_refresh_token=True):
         resp = self.client.post(
-            reverse(self.provider.id + "_login")
-            + "?"
-            + urlencode({"process": process, "shop": "test"}),
+            (reverse(f"{self.provider.id}_login") + "?")
+            + urlencode({"process": process, "shop": "test"})
         )
+
         self.assertEqual(resp.status_code, 200)  # No re-direct, JS must do it
         actual_content = resp.content.decode("utf8")
         self.assertTrue(
             "script" in actual_content,
-            "Content missing script tag. [Actual: {}]".format(actual_content),
+            f"Content missing script tag. [Actual: {actual_content}]",
         )
+
         self.assertTrue(
             resp.xframe_options_exempt,
             "Redirect JS must be allowed to run in Shopify iframe",
@@ -91,8 +91,9 @@ class ShopifyEmbeddedTests(ShopifyTests):
         self.assertTrue(
             "<!DOCTYPE html><html><head>" in actual_content
             and "</head><body></body></html>" in actual_content,
-            "Expected standard HTML skeleton. [Actual: {}]".format(actual_content),
+            f"Expected standard HTML skeleton. [Actual: {actual_content}]",
         )
+
         p = urlparse(
             actual_content.split(";</script>")[0].split('location.href = "')[1]
         )

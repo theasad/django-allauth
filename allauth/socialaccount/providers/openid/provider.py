@@ -43,7 +43,7 @@ class OpenIDProvider(Provider):
     def get_login_url(self, request, **kwargs):
         url = reverse("openid_login")
         if kwargs:
-            url += "?" + urlencode(kwargs)
+            url += f"?{urlencode(kwargs)}"
         return url
 
     def get_brands(self):
@@ -56,20 +56,23 @@ class OpenIDProvider(Provider):
 
     def get_server_settings(self, endpoint):
         servers = self.get_settings().get("SERVERS", [])
-        for server in servers:
-            if endpoint is not None and endpoint.startswith(server.get("openid_url")):
-                return server
-        return {}
+        return next(
+            (
+                server
+                for server in servers
+                if endpoint is not None
+                and endpoint.startswith(server.get("openid_url"))
+            ),
+            {},
+        )
 
     def extract_extra_data(self, response):
-        extra_data = {}
         server_settings = self.get_server_settings(response.endpoint.server_url)
         extra_attributes = server_settings.get("extra_attributes", [])
-        for attribute_id, name, _ in extra_attributes:
-            extra_data[attribute_id] = get_value_from_response(
-                response, ax_names=[name]
-            )
-        return extra_data
+        return {
+            attribute_id: get_value_from_response(response, ax_names=[name])
+            for attribute_id, name, _ in extra_attributes
+        }
 
     def extract_uid(self, response):
         return response.identity_url

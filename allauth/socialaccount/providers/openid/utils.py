@@ -115,9 +115,8 @@ class DBOpenIDStore(OIDStore):
                 expires_in = assoc.expiresIn
             if expires_in == 0:
                 stored_assoc.delete()
-            else:
-                if return_val is None:
-                    return_val = assoc
+            elif return_val is None:
+                return_val = assoc
 
         return return_val
 
@@ -144,15 +143,12 @@ class DBOpenIDStore(OIDStore):
 
 def get_email_from_response(response):
     email = None
-    sreg = SRegResponse.fromSuccessResponse(response)
-    if sreg:
+    if sreg := SRegResponse.fromSuccessResponse(response):
         email = valid_email_or_none(sreg.get(SRegField.EMAIL))
     if not email:
-        ax = FetchResponse.fromSuccessResponse(response)
-        if ax:
+        if ax := FetchResponse.fromSuccessResponse(response):
             try:
-                values = ax.get(AXAttribute.CONTACT_EMAIL)
-                if values:
+                if values := ax.get(AXAttribute.CONTACT_EMAIL):
                     email = valid_email_or_none(values[0])
             except KeyError:
                 pass
@@ -162,20 +158,17 @@ def get_email_from_response(response):
 def get_value_from_response(response, sreg_names=None, ax_names=None):
     value = None
     if sreg_names:
-        sreg = SRegResponse.fromSuccessResponse(response)
-        if sreg:
+        if sreg := SRegResponse.fromSuccessResponse(response):
             for name in sreg_names:
                 value = sreg.get(name)
                 if value:
                     break
 
     if not value and ax_names:
-        ax = FetchResponse.fromSuccessResponse(response)
-        if ax:
+        if ax := FetchResponse.fromSuccessResponse(response):
             for name in ax_names:
                 try:
-                    values = ax.get(name)
-                    if values:
+                    if values := ax.get(name):
                         value = values[0]
                 except KeyError:
                     pass

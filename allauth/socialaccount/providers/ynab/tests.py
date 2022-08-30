@@ -47,8 +47,9 @@ class YNABTests(OAuth2TestsMixin, TestCase):
                     raise HTTPError(None)
 
         request = RequestFactory().get(
-            reverse(self.provider.id + "_login"), dict(process="login")
+            reverse(f"{self.provider.id}_login"), dict(process="login")
         )
+
 
         adapter = YNABOAuth2Adapter(request)
         app = adapter.get_provider().get_app(request)
