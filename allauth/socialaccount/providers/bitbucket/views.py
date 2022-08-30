@@ -24,8 +24,7 @@ class BitbucketAPI(OAuth):
                 if address["primary"]:
                     break
         data = json.loads(self.query(self.users_url + email))
-        user = data["user"]
-        return user
+        return data["user"]
 
 
 class BitbucketOAuthAdapter(OAuthAdapter):

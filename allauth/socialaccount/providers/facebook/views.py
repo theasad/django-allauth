@@ -30,24 +30,23 @@ def compute_appsecret_proof(app, token):
     # see https://developers.facebook.com/docs/graph-api/securing-requests
     msg = token.token.encode("utf-8")
     key = app.secret.encode("utf-8")
-    appsecret_proof = hmac.new(key, msg, digestmod=hashlib.sha256).hexdigest()
-    return appsecret_proof
+    return hmac.new(key, msg, digestmod=hashlib.sha256).hexdigest()
 
 
 def fb_complete_login(request, app, token):
     provider = providers.registry.by_id(app.provider, request)
     resp = requests.get(
-        GRAPH_API_URL + "/me",
+        f"{GRAPH_API_URL}/me",
         params={
             "fields": ",".join(provider.get_fields()),
             "access_token": token.token,
             "appsecret_proof": compute_appsecret_proof(app, token),
         },
     )
+
     resp.raise_for_status()
     extra_data = resp.json()
-    login = provider.sociallogin_from_response(request, extra_data)
-    return login
+    return provider.sociallogin_from_response(request, extra_data)
 
 
 class FacebookOAuth2Adapter(OAuth2Adapter):
@@ -84,19 +83,20 @@ def login_by_token(request):
                 expires_at = None
                 if login_options.get("auth_type") == "reauthenticate":
                     info = requests.get(
-                        GRAPH_API_URL + "/oauth/access_token_info",
+                        f"{GRAPH_API_URL}/oauth/access_token_info",
                         params={
                             "client_id": app.client_id,
                             "access_token": access_token,
                         },
                     ).json()
+
                     nonce = provider.get_nonce(request, pop=True)
                     ok = nonce and nonce == info.get("auth_nonce")
                 else:
                     ok = True
                 if ok and provider.get_settings().get("EXCHANGE_TOKEN"):
                     resp = requests.get(
-                        GRAPH_API_URL + "/oauth/access_token",
+                        f"{GRAPH_API_URL}/oauth/access_token",
                         params={
                             "grant_type": "fb_exchange_token",
                             "client_id": app.client_id,
@@ -104,9 +104,9 @@ def login_by_token(request):
                             "fb_exchange_token": access_token,
                         },
                     ).json()
+
                     access_token = resp["access_token"]
-                    expires_in = resp.get("expires_in")
-                    if expires_in:
+                    if expires_in := resp.get("expires_in"):
                         expires_at = timezone.now() + timedelta(seconds=int(expires_in))
                 if ok:
                     token = SocialToken(

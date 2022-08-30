@@ -42,8 +42,8 @@ class OAuth2Client(object):
         }
         if self.state:
             params["state"] = self.state
-        params.update(extra_params)
-        return "%s?%s" % (authorization_url, urlencode(params))
+        params |= extra_params
+        return f"{authorization_url}?{urlencode(params)}"
 
     def get_access_token(self, code):
         data = {
@@ -55,12 +55,11 @@ class OAuth2Client(object):
             auth = requests.auth.HTTPBasicAuth(self.consumer_key, self.consumer_secret)
         else:
             auth = None
-            data.update(
-                {
-                    "client_id": self.consumer_key,
-                    "client_secret": self.consumer_secret,
-                }
-            )
+            data |= {
+                "client_id": self.consumer_key,
+                "client_secret": self.consumer_secret,
+            }
+
         params = None
         self._strip_empty_keys(data)
         url = self.access_token_url
@@ -88,7 +87,7 @@ class OAuth2Client(object):
             else:
                 access_token = dict(parse_qsl(resp.text))
         if not access_token or "access_token" not in access_token:
-            raise OAuth2Error("Error retrieving access token: %s" % resp.content)
+            raise OAuth2Error(f"Error retrieving access token: {resp.content}")
         return access_token
 
     def _strip_empty_keys(self, params):

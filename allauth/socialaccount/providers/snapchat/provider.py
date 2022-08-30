@@ -11,10 +11,7 @@ class Scope(object):
 class SnapchatAccount(ProviderAccount):
     def to_str(self):
         dflt = super(SnapchatAccount, self).to_str()
-        return "%s (%s)" % (
-            self.account.extra_data.get("data").get("me").get("displayName", ""),
-            dflt,
-        )
+        return f'{self.account.extra_data.get("data").get("me").get("displayName", "")} ({dflt})'
 
 
 class SnapchatProvider(OAuth2Provider):
@@ -23,8 +20,7 @@ class SnapchatProvider(OAuth2Provider):
     account_class = SnapchatAccount
 
     def get_default_scope(self):
-        scope = [Scope.EXTERNAL_ID, Scope.DISPLAY_NAME]
-        return scope
+        return [Scope.EXTERNAL_ID, Scope.DISPLAY_NAME]
 
     def extract_uid(self, data):
         return str(data.get("data").get("me").get("externalId"))

@@ -28,7 +28,7 @@ class LinkedInOAuth2Adapter(OAuth2Adapter):
         fields = self.get_provider().get_profile_fields()
 
         headers = {}
-        headers.update(self.get_provider().get_settings().get("HEADERS", {}))
+        headers |= self.get_provider().get_settings().get("HEADERS", {})
         headers["Authorization"] = " ".join(["Bearer", token.token])
 
         info = {}
@@ -39,7 +39,7 @@ class LinkedInOAuth2Adapter(OAuth2Adapter):
             if resp.ok:
                 info = resp.json()
 
-        url = self.profile_url + "?projection=(%s)" % ",".join(fields)
+        url = self.profile_url + f'?projection=({",".join(fields)})'
         resp = requests.get(url, headers=headers)
         resp.raise_for_status()
         info.update(resp.json())

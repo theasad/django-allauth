@@ -26,8 +26,7 @@ class TrelloOAuthAdapter(OAuthAdapter):
         resp = requests.get(info_url)
         resp.raise_for_status()
         extra_data = resp.json()
-        result = self.get_provider().sociallogin_from_response(request, extra_data)
-        return result
+        return self.get_provider().sociallogin_from_response(request, extra_data)
 
 
 oauth_login = OAuthLoginView.adapter_view(TrelloOAuthAdapter)

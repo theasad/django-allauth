@@ -28,7 +28,7 @@ class ShareFileOAuth2Adapter(OAuth2Adapter):
     )
 
     def complete_login(self, request, app, token, response):
-        headers = {"Authorization": "Bearer {}".format(token.token)}
+        headers = {"Authorization": f"Bearer {token.token}"}
         extra_data = requests.get(self.profile_url, headers=headers).json()
         return self.get_provider().sociallogin_from_response(request, extra_data)
 

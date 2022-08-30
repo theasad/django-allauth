@@ -25,8 +25,7 @@ class NaverProvider(OAuth2Provider):
 
     def extract_email_addresses(self, data):
         ret = []
-        email = data.get("email")
-        if email:
+        if email := data.get("email"):
             ret.append(EmailAddress(email=email, verified=True, primary=True))
         return ret
 

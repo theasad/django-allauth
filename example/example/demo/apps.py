@@ -17,7 +17,7 @@ def setup_dummy_social_apps(sender, **kwargs):
 
     site = Site.objects.get_current()
     for provider in registry.get_list():
-        if isinstance(provider, OAuth2Provider) or isinstance(provider, OAuthProvider):
+        if isinstance(provider, (OAuth2Provider, OAuthProvider)):
             try:
                 SocialApp.objects.get(provider=provider.id, sites=site)
             except SocialApp.DoesNotExist:
@@ -31,8 +31,9 @@ def setup_dummy_social_apps(sender, **kwargs):
                     provider=provider.id,
                     secret="secret",
                     client_id="client-id",
-                    name="Dummy %s app" % provider.id,
+                    name=f"Dummy {provider.id} app",
                 )
+
                 app.sites.add(site)
 
 

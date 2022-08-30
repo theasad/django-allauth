@@ -25,7 +25,7 @@ class GiteaOAuth2Adapter(OAuth2Adapter):
     profile_url = "{0}/user".format(api_url)
 
     def complete_login(self, request, app, token, **kwargs):
-        headers = {"Authorization": "token {}".format(token.token)}
+        headers = {"Authorization": f"token {token.token}"}
         resp = requests.get(self.profile_url, headers=headers)
         resp.raise_for_status()
         extra_data = resp.json()

@@ -20,11 +20,7 @@ class FrontierAccount(ProviderAccount):
 
     def to_str(self):
         dflt = super(FrontierAccount, self).to_str()
-        full_name = "%s %s" % (
-            self.account.extra_data.get("firstname", dflt),
-            self.account.extra_data.get("lastname", dflt),
-        )
-        return full_name
+        return f'{self.account.extra_data.get("firstname", dflt)} {self.account.extra_data.get("lastname", dflt)}'
 
 
 class FrontierProvider(OAuth2Provider):
@@ -33,8 +29,7 @@ class FrontierProvider(OAuth2Provider):
     account_class = FrontierAccount
 
     def get_default_scope(self):
-        scope = ["auth", "capi"]
-        return scope
+        return ["auth", "capi"]
 
     def extract_uid(self, data):
         return str(data["customer_id"])
@@ -49,8 +44,7 @@ class FrontierProvider(OAuth2Provider):
 
     def extract_email_addresses(self, data):
         ret = []
-        email = data.get("email")
-        if email:
+        if email := data.get("email"):
             ret.append(EmailAddress(email=email, verified=True, primary=True))
         return ret
 

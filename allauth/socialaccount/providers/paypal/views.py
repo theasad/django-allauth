@@ -30,10 +30,7 @@ class PaypalOAuth2Adapter(OAuth2Adapter):
 
     def _get_endpoint(self):
         settings = self.get_provider().get_settings()
-        if settings.get("MODE") == "live":
-            return "paypal.com"
-        else:
-            return "sandbox.paypal.com"
+        return "paypal.com" if settings.get("MODE") == "live" else "sandbox.paypal.com"
 
     def complete_login(self, request, app, token, **kwargs):
         response = requests.post(

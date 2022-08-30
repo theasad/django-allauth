@@ -51,8 +51,7 @@ class AppleOAuth2Adapter(OAuth2Adapter):
         kid = jwt.get_unverified_header(id_token)["kid"]
         apple_public_key = self._get_apple_public_key(kid=kid)
 
-        public_key = jwt.algorithms.RSAAlgorithm.from_jwk(json.dumps(apple_public_key))
-        return public_key
+        return jwt.algorithms.RSAAlgorithm.from_jwk(json.dumps(apple_public_key))
 
     def get_client_id(self, provider):
         app = get_adapter().get_app(request=None, provider=self.provider_id)
@@ -64,14 +63,14 @@ class AppleOAuth2Adapter(OAuth2Adapter):
 
         try:
             public_key = self.get_public_key(id_token)
-            identity_data = jwt.decode(
+            return jwt.decode(
                 id_token,
                 public_key,
                 algorithms=["RS256"],
                 audience=allowed_auds,
                 issuer="https://appleid.apple.com",
             )
-            return identity_data
+
 
         except jwt.PyJWTError as e:
             raise OAuth2Error("Invalid id_token") from e
@@ -82,8 +81,7 @@ class AppleOAuth2Adapter(OAuth2Adapter):
         )
         token.token_secret = data.get("refresh_token", "")
 
-        expires_in = data.get(self.expires_in_key)
-        if expires_in:
+        if expires_in := data.get(self.expires_in_key):
             token.expires_at = timezone.now() + timedelta(seconds=int(expires_in))
 
         # `user_data` is a big flat dictionary with the parsed JWT claims
@@ -155,8 +153,7 @@ def apple_post_callback(request, finish_endpoint_name="apple_finish_callback"):
     keys_to_put_in_url = ["code", "state", "error"]
     url_params = {}
     for key in keys_to_put_in_url:
-        value = get_request_param(request, key, "")
-        if value:
+        if value := get_request_param(request, key, ""):
             url_params[key] = value
 
     # Add other params to the apple_login_session

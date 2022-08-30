@@ -44,8 +44,7 @@ class YandexProvider(OAuth2Provider):
 
     def extract_email_addresses(self, data):
         ret = []
-        email = self.get_user_email(data)
-        if email:
+        if email := self.get_user_email(data):
             ret.append(EmailAddress(email=email, verified=True, primary=True))
         return ret
 

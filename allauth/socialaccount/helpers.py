@@ -21,12 +21,9 @@ from .providers.base import AuthError, AuthProcess
 
 
 def _process_signup(request, sociallogin):
-    auto_signup = get_adapter(request).is_auto_signup_allowed(request, sociallogin)
-    if not auto_signup:
-        request.session["socialaccount_sociallogin"] = sociallogin.serialize()
-        url = reverse("socialaccount_signup")
-        ret = HttpResponseRedirect(url)
-    else:
+    if auto_signup := get_adapter(request).is_auto_signup_allowed(
+        request, sociallogin
+    ):
         # Ok, auto signup it is, at least the e-mail address is ok.
         # We still need to check the username though...
         if account_settings.USER_MODEL_USERNAME_FIELD:
@@ -42,11 +39,15 @@ def _process_signup(request, sociallogin):
         if not get_adapter(request).is_open_for_signup(request, sociallogin):
             return render(
                 request,
-                "account/signup_closed." + account_settings.TEMPLATE_EXTENSION,
+                f"account/signup_closed.{account_settings.TEMPLATE_EXTENSION}",
             )
+
         get_adapter(request).save_user(request, sociallogin, form=None)
-        ret = complete_social_signup(request, sociallogin)
-    return ret
+        return complete_social_signup(request, sociallogin)
+    else:
+        request.session["socialaccount_sociallogin"] = sociallogin.serialize()
+        url = reverse("socialaccount_signup")
+        return HttpResponseRedirect(url)
 
 
 def _login_social_account(request, sociallogin):
@@ -87,10 +88,10 @@ def render_authentication_error(
             "exception": exception,
         }
     }
-    context.update(extra_context)
+    context |= extra_context
     return render(
         request,
-        "socialaccount/authentication_error." + account_settings.TEMPLATE_EXTENSION,
+        f"socialaccount/authentication_error.{account_settings.TEMPLATE_EXTENSION}",
         context,
     )
 
@@ -198,6 +199,4 @@ def import_path(path):
 
 def socialaccount_user_display(socialaccount):
     func = app_settings.SOCIALACCOUNT_STR
-    if not func:
-        return user_display(socialaccount.user)
-    return func(socialaccount)
+    return func(socialaccount) if func else user_display(socialaccount.user)

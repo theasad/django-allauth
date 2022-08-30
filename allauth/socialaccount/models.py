@@ -246,10 +246,7 @@ class SocialLogin(object):
         if app_settings.STORE_TOKENS and self.token and self.token.app_id:
             self.token.account = self.account
             self.token.save()
-        if connect:
-            # TODO: Add any new email addresses automatically?
-            pass
-        else:
+        if not connect:
             setup_user_email(request, user, self.email_addresses)
 
     @property
@@ -295,14 +292,12 @@ class SocialLogin(object):
             pass
 
     def get_redirect_url(self, request):
-        url = self.state.get("next")
-        return url
+        return self.state.get("next")
 
     @classmethod
     def state_from_request(cls, request):
         state = {}
-        next_url = get_next_redirect_url(request)
-        if next_url:
+        if next_url := get_next_redirect_url(request):
             state["next"] = next_url
         state["process"] = get_request_param(request, "process", "login")
         state["scope"] = get_request_param(request, "scope", "")

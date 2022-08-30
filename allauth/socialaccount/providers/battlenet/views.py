@@ -55,7 +55,7 @@ def _check_errors(response):
         error = data.get("error", "") or data.get("type", "")
         desc = data.get("error_description", "") or data.get("detail", "")
 
-        raise OAuth2Error("Battle.net error: %s (%s)" % (error, desc))
+        raise OAuth2Error(f"Battle.net error: {error} ({desc})")
 
     # The expected output from the API follows this format:
     # {"id": 12345, "battletag": "Example#12345"}
@@ -105,29 +105,26 @@ class BattleNetOAuth2Adapter(OAuth2Adapter):
             .get("REGION", "us")
         )
 
-        if region in self.valid_regions:
-            return region
-
-        return Region.US
+        return region if region in self.valid_regions else Region.US
 
     @property
     def battlenet_base_url(self):
         region = self.battlenet_region
         if region == Region.CN:
             return "https://www.battlenet.com.cn"
-        return "https://%s.battle.net" % (region)
+        return f"https://{region}.battle.net"
 
     @property
     def access_token_url(self):
-        return self.battlenet_base_url + "/oauth/token"
+        return f"{self.battlenet_base_url}/oauth/token"
 
     @property
     def authorize_url(self):
-        return self.battlenet_base_url + "/oauth/authorize"
+        return f"{self.battlenet_base_url}/oauth/authorize"
 
     @property
     def profile_url(self):
-        return self.battlenet_base_url + "/oauth/userinfo"
+        return f"{self.battlenet_base_url}/oauth/userinfo"
 
     def complete_login(self, request, app, token, **kwargs):
         params = {"access_token": token.token}
@@ -144,7 +141,7 @@ class BattleNetOAuth2Adapter(OAuth2Adapter):
         region = request.GET.get("region", "").lower()
         # Pass the region down to the callback URL if we specified it
         if region and region in self.valid_regions:
-            r += "?region=%s" % (region)
+            r += f"?region={region}"
         return r
 
 

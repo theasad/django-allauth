@@ -13,9 +13,7 @@ class FeedlyAccount(ProviderAccount):
             self.account.extra_data.get("givenName", ""),
             self.account.extra_data.get("familyName", ""),
         )
-        if name.strip() != "":
-            return name
-        return super(FeedlyAccount, self).to_str()
+        return name if name.strip() != "" else super(FeedlyAccount, self).to_str()
 
 
 class FeedlyProvider(OAuth2Provider):

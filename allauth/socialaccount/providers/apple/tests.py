@@ -188,13 +188,13 @@ class AppleTests(OAuth2TestsMixin, TestCase):
 
     def login(self, resp_mock, process="login", with_refresh_token=True):
         resp = self.client.post(
-            reverse(self.provider.id + "_login")
-            + "?"
+            (reverse(f"{self.provider.id}_login") + "?")
             + urlencode(dict(process=process))
         )
+
         p = urlparse(resp["location"])
         q = parse_qs(p.query)
-        complete_url = reverse(self.provider.id + "_callback")
+        complete_url = reverse(f"{self.provider.id}_callback")
         self.assertGreater(q["redirect_uri"][0].find(complete_url), 0)
         response_json = self.get_login_response_json(
             with_refresh_token=with_refresh_token
@@ -217,17 +217,17 @@ class AppleTests(OAuth2TestsMixin, TestCase):
     def test_authentication_error(self):
         """Override base test because apple posts errors"""
         resp = self.client.post(
-            reverse(self.provider.id + "_callback"),
+            reverse(f"{self.provider.id}_callback"),
             data={"error": "misc", "state": "testingstate123"},
         )
+
         assert reverse("apple_finish_callback") in resp.url
         # Follow the redirect
         resp = self.client.get(resp.url)
 
         self.assertTemplateUsed(
             resp,
-            "socialaccount/authentication_error.%s"
-            % getattr(settings, "ACCOUNT_TEMPLATE_EXTENSION", "html"),
+            f'socialaccount/authentication_error.{getattr(settings, "ACCOUNT_TEMPLATE_EXTENSION", "html")}',
         )
 
     def test_apple_finish(self):

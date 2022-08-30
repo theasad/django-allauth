@@ -22,7 +22,7 @@ class ShopifyOAuth2Adapter(OAuth2Adapter):
     def _shop_domain(self):
         shop = self.request.GET.get("shop", "")
         if "." not in shop:
-            shop = "{}.myshopify.com".format(shop)
+            shop = f"{shop}.myshopify.com"
         # Ensure the provided hostname parameter is a valid hostname,
         # ends with myshopify.com, and does not contain characters
         # other than letters (a-z), numbers (0-9), dots, and hyphens.
@@ -34,7 +34,7 @@ class ShopifyOAuth2Adapter(OAuth2Adapter):
 
     def _shop_url(self, path):
         shop = self._shop_domain()
-        return "https://{}{}".format(shop, path)
+        return f"https://{shop}{path}"
 
     @property
     def access_token_url(self):
@@ -52,20 +52,18 @@ class ShopifyOAuth2Adapter(OAuth2Adapter):
         headers = {"X-Shopify-Access-Token": "{token}".format(token=token.token)}
         response = requests.get(self.profile_url, headers=headers)
         extra_data = response.json()
-        associated_user = kwargs["response"].get("associated_user")
-        if associated_user:
+        if associated_user := kwargs["response"].get("associated_user"):
             extra_data["associated_user"] = associated_user
         return self.get_provider().sociallogin_from_response(request, extra_data)
 
 
 class ShopifyOAuth2LoginView(OAuth2LoginView):
     def dispatch(self, request, *args, **kwargs):
-        is_embedded = (
+        if is_embedded := (
             getattr(settings, "SOCIALACCOUNT_PROVIDERS", {})
             .get("shopify", {})
             .get("IS_EMBEDDED", False)
-        )
-        if is_embedded:
+        ):
             # TODO: This bypasses LOGIN_ON_GET, but:
             #
             #     The Embedded App SDK (EASDK) and backwards compatibility layer

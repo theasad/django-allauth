@@ -17,9 +17,7 @@ class AzureAccount(ProviderAccount):
             self.account.extra_data.get("first_name", ""),
             self.account.extra_data.get("last_name", ""),
         )
-        if name.strip() != "":
-            return name
-        return super(AzureAccount, self).to_str()
+        return name if name.strip() != "" else super(AzureAccount, self).to_str()
 
 
 class AzureProvider(OAuth2Provider):

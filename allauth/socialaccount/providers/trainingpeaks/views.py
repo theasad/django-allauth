@@ -27,20 +27,20 @@ class TrainingPeaksOAuth2Adapter(OAuth2Adapter):
 
     @property
     def access_token_url(self):
-        return "https://oauth." + self.get_hostname() + "/oauth/token"
+        return f"https://oauth.{self.get_hostname()}/oauth/token"
 
     @property
     def authorize_url(self):
-        return "https://oauth." + self.get_hostname() + "/OAuth/Authorize"
+        return f"https://oauth.{self.get_hostname()}/OAuth/Authorize"
 
     @property
     def profile_url(self):
-        return "https://api." + self.get_hostname() + "/v1/athlete/profile"
+        return f"https://api.{self.get_hostname()}/v1/athlete/profile"
 
     @property
     def api_hostname(self):
         """Return https://api.hostname.tld"""
-        return "https://api." + self.get_hostname()
+        return f"https://api.{self.get_hostname()}"
 
     # https://oauth.sandbox.trainingpeaks.com/oauth/deauthorize
 

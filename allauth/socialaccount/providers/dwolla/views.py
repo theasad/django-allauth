@@ -46,10 +46,11 @@ class DwollaOAuth2Adapter(OAuth2Adapter):
         resp = requests.get(
             response["_links"]["account"]["href"],
             headers={
-                "authorization": "Bearer %s" % token.token,
+                "authorization": f"Bearer {token.token}",
                 "accept": "application/vnd.dwolla.v1.hal+json",
             },
         )
+
 
         extra_data = resp.json()
 

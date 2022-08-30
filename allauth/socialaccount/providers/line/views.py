@@ -31,8 +31,7 @@ class LineOAuth2Adapter(OAuth2Adapter):
         else:
             token = SocialToken(token=data["access_token"])
         token.token_secret = data.get("refresh_token", "")
-        expires_in = data.get(self.expires_in_key, None)
-        if expires_in:
+        if expires_in := data.get(self.expires_in_key, None):
             token.expires_at = timezone.now() + timedelta(seconds=int(expires_in))
 
         return token

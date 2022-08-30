@@ -28,8 +28,7 @@ class GiteaProvider(OAuth2Provider):
     account_class = GiteaAccount
 
     def get_default_scope(self):
-        scope = []
-        return scope
+        return []
 
     def extract_uid(self, data):
         return str(data["id"])

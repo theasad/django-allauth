@@ -4,12 +4,11 @@ from allauth.socialaccount.providers.oauth.provider import OAuthProvider
 
 class TumblrAccount(ProviderAccount):
     def get_profile_url_(self):
-        return "http://%s.tumblr.com/" % self.account.extra_data.get("name")
+        return f'http://{self.account.extra_data.get("name")}.tumblr.com/'
 
     def to_str(self):
         dflt = super(TumblrAccount, self).to_str()
-        name = self.account.extra_data.get("name", dflt)
-        return name
+        return self.account.extra_data.get("name", dflt)
 
 
 class TumblrProvider(OAuthProvider):

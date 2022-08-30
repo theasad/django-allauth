@@ -15,9 +15,7 @@ class AppleProvider(OAuth2Provider):
     def extract_common_fields(self, data):
         fields = {"email": data.get("email")}
 
-        # If the name was provided
-        name = data.get("name")
-        if name:
+        if name := data.get("name"):
             fields["first_name"] = name.get("firstName", "")
             fields["last_name"] = name.get("lastName", "")
 

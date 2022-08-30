@@ -71,9 +71,9 @@ class TwitchTests(OAuth2TestsMixin, TestCase):
         they are caught and rendered to generic error HTML
         """
         request = RequestFactory().get(
-            reverse(self.provider.id + "_login"),
-            {"process": "login"},
+            reverse(f"{self.provider.id}_login"), {"process": "login"}
         )
+
         adapter = TwitchOAuth2Adapter(request)
         app = adapter.get_provider().get_app(request)
         token = SocialToken(token="this-is-my-fake-token")

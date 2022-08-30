@@ -18,9 +18,9 @@ class FrontierOAuth2Adapter(OAuth2Adapter):
 
     def complete_login(self, request, app, token, **kwargs):
         resp = requests.get(
-            self.profile_url,
-            headers={"Authorization": "Bearer " + token.token},
+            self.profile_url, headers={"Authorization": f"Bearer {token.token}"}
         )
+
         resp.raise_for_status()
         extra_data = resp.json()
         return self.get_provider().sociallogin_from_response(request, extra_data)

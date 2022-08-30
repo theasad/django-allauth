@@ -78,11 +78,11 @@ class DefaultAccountAdapter(object):
         beyond allauth scope, for example, by having accepted an
         invitation before signing up.
         """
-        ret = False
-        verified_email = request.session.get("account_verified_email")
-        if verified_email:
-            ret = verified_email.lower() == email.lower()
-        return ret
+        return (
+            verified_email.lower() == email.lower()
+            if (verified_email := request.session.get("account_verified_email"))
+            else False
+        )
 
     def format_email_subject(self, subject):
         prefix = app_settings.EMAIL_SUBJECT_PREFIX
@@ -174,10 +174,11 @@ class DefaultAccountAdapter(object):
         The URL to return to after successful e-mail confirmation.
         """
         if request.user.is_authenticated:
-            if app_settings.EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL:
-                return app_settings.EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL
-            else:
-                return self.get_login_redirect_url(request)
+            return (
+                app_settings.EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL
+                or self.get_login_redirect_url(request)
+            )
+
         else:
             return app_settings.EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL
 
@@ -194,8 +195,7 @@ class DefaultAccountAdapter(object):
         """
         Instantiates a new User instance.
         """
-        user = get_user_model()()
-        return user
+        return get_user_model()()
 
     def populate_username(self, request, user):
         """
@@ -205,11 +205,11 @@ class DefaultAccountAdapter(object):
         """
         from .utils import user_email, user_field, user_username
 
-        first_name = user_field(user, "first_name")
-        last_name = user_field(user, "last_name")
-        email = user_email(user)
-        username = user_username(user)
         if app_settings.USER_MODEL_USERNAME_FIELD:
+            first_name = user_field(user, "first_name")
+            last_name = user_field(user, "last_name")
+            email = user_email(user)
+            username = user_username(user)
             user_username(
                 user,
                 username
@@ -327,12 +327,11 @@ class DefaultAccountAdapter(object):
             try:
                 if message_context is None:
                     message_context = {}
-                escaped_message = render_to_string(
+                if escaped_message := render_to_string(
                     message_template,
                     message_context,
                     self.request,
-                ).strip()
-                if escaped_message:
+                ).strip():
                     message = html.unescape(escaped_message)
                     messages.add_message(request, level, message, extra_tags=extra_tags)
             except TemplateDoesNotExist:
@@ -346,13 +345,14 @@ class DefaultAccountAdapter(object):
             status = 200
             resp["location"] = redirect_to
         if form:
-            if request.method == "POST":
-                if form.is_valid():
-                    status = 200
-                else:
-                    status = 400
-            else:
+            if (
+                request.method == "POST"
+                and form.is_valid()
+                or request.method != "POST"
+            ):
                 status = 200
+            else:
+                status = 400
             resp["form"] = self.ajax_response_form(form)
             if hasattr(response, "render"):
                 response.render()
@@ -511,27 +511,26 @@ class DefaultAccountAdapter(object):
         can be `None` here.
         """
         url = reverse("account_confirm_email", args=[emailconfirmation.key])
-        ret = build_absolute_uri(request, url)
-        return ret
+        return build_absolute_uri(request, url)
 
     def should_send_confirmation_mail(self, request, email_address):
         from allauth.account.models import EmailConfirmation
 
         cooldown_period = timedelta(seconds=app_settings.EMAIL_CONFIRMATION_COOLDOWN)
-        if app_settings.EMAIL_CONFIRMATION_HMAC:
-            send_email = ratelimit.consume(
+        return (
+            ratelimit.consume(
                 request,
                 action="confirm_email",
                 key=email_address.email,
                 amount=1,
                 duration=cooldown_period.total_seconds(),
             )
-        else:
-            send_email = not EmailConfirmation.objects.filter(
+            if app_settings.EMAIL_CONFIRMATION_HMAC
+            else not EmailConfirmation.objects.filter(
                 sent__gt=timezone.now() - cooldown_period,
                 email_address=email_address,
             ).exists()
-        return send_email
+        )
 
     def send_confirmation_mail(self, request, emailconfirmation, signup):
         current_site = get_current_site(request)
@@ -606,16 +605,14 @@ class DefaultAccountAdapter(object):
         )
 
     def get_client_ip(self, request):
-        x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
-        if x_forwarded_for:
-            ip = x_forwarded_for.split(",")[0]
-        else:
-            ip = request.META.get("REMOTE_ADDR")
-        return ip
+        return (
+            x_forwarded_for.split(",")[0]
+            if (x_forwarded_for := request.META.get("HTTP_X_FORWARDED_FOR"))
+            else request.META.get("REMOTE_ADDR")
+        )
 
     def generate_emailconfirmation_key(self, email):
-        key = get_random_string(64).lower()
-        return key
+        return get_random_string(64).lower()
 
 
 def get_adapter(request=None):

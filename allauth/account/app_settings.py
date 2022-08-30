@@ -18,8 +18,10 @@ class AppSettings(object):
         self.prefix = prefix
         # If login is by email, email must be required
         assert (
-            not self.AUTHENTICATION_METHOD == self.AuthenticationMethod.EMAIL
-        ) or self.EMAIL_REQUIRED
+            self.AUTHENTICATION_METHOD != self.AuthenticationMethod.EMAIL
+            or self.EMAIL_REQUIRED
+        )
+
         # If login includes email, login must be unique
         assert (
             self.AUTHENTICATION_METHOD == self.AuthenticationMethod.USERNAME
@@ -121,8 +123,9 @@ class AppSettings(object):
 
     @property
     def AUTHENTICATION_METHOD(self):
-        ret = self._setting("AUTHENTICATION_METHOD", self.AuthenticationMethod.USERNAME)
-        return ret
+        return self._setting(
+            "AUTHENTICATION_METHOD", self.AuthenticationMethod.USERNAME
+        )
 
     @property
     def EMAIL_MAX_LENGTH(self):
@@ -166,10 +169,11 @@ class AppSettings(object):
         """
         from django.conf import settings
 
-        ret = None
-        if not settings.AUTH_PASSWORD_VALIDATORS:
-            ret = self._setting("PASSWORD_MIN_LENGTH", 6)
-        return ret
+        return (
+            None
+            if settings.AUTH_PASSWORD_VALIDATORS
+            else self._setting("PASSWORD_MIN_LENGTH", 6)
+        )
 
     @property
     def RATE_LIMITS(self):
@@ -346,22 +350,20 @@ class AppSettings(object):
 
         from allauth.utils import get_user_model, import_attribute
 
-        path = self._setting("USERNAME_VALIDATORS", None)
-        if path:
+        if path := self._setting("USERNAME_VALIDATORS", None):
             ret = import_attribute(path)
             if not isinstance(ret, list):
                 raise ImproperlyConfigured(
                     "ACCOUNT_USERNAME_VALIDATORS is expected to be a list"
                 )
+        elif self.USER_MODEL_USERNAME_FIELD is None:
+            ret = []
         else:
-            if self.USER_MODEL_USERNAME_FIELD is not None:
-                ret = (
-                    get_user_model()
-                    ._meta.get_field(self.USER_MODEL_USERNAME_FIELD)
-                    .validators
-                )
-            else:
-                ret = []
+            ret = (
+                get_user_model()
+                ._meta.get_field(self.USER_MODEL_USERNAME_FIELD)
+                .validators
+            )
         return ret
 
 

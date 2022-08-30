@@ -12,12 +12,11 @@ class FlickrAccount(ProviderAccount):
     def to_str(self):
         dflt = super(FlickrAccount, self).to_str()
 
-        # Try to use name if it exists. If there is no name, the Flickr API
-        # returns an empty stirng.
-        name = (
-            self.account.extra_data.get("person").get("realname").get("_content", None)
-        )
-        if name:
+        if name := (
+            self.account.extra_data.get("person")
+            .get("realname")
+            .get("_content", None)
+        ):
             return name
 
         # Default to username if name does not exist.
@@ -32,8 +31,7 @@ class FlickrProvider(OAuthProvider):
     account_class = FlickrAccount
 
     def get_default_scope(self):
-        scope = []
-        return scope
+        return []
 
     def get_auth_params(self, request, action):
         ret = super(FlickrProvider, self).get_auth_params(request, action)
@@ -50,8 +48,7 @@ class FlickrProvider(OAuthProvider):
             "picture-url",
             "public-profile-url",
         ]
-        fields = self.get_settings().get("PROFILE_FIELDS", default_fields)
-        return fields
+        return self.get_settings().get("PROFILE_FIELDS", default_fields)
 
     def extract_uid(self, data):
         return data["person"]["nsid"]

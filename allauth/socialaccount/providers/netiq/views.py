@@ -19,15 +19,15 @@ class NetIQOAuth2Adapter(OAuth2Adapter):
 
     @property
     def access_token_url(self):
-        return "{}/nidp/oauth/nam/token".format(self.provider_base_url)
+        return f"{self.provider_base_url}/nidp/oauth/nam/token"
 
     @property
     def authorize_url(self):
-        return "{}/nidp/oauth/nam/authz".format(self.provider_base_url)
+        return f"{self.provider_base_url}/nidp/oauth/nam/authz"
 
     @property
     def userinfo_url(self):
-        return "{}/nidp/oauth/nam/userinfo".format(self.provider_base_url)
+        return f"{self.provider_base_url}/nidp/oauth/nam/userinfo"
 
     def complete_login(self, request, app, token, **kwargs):
         """
@@ -41,14 +41,13 @@ class NetIQOAuth2Adapter(OAuth2Adapter):
         """
 
         resp = requests.get(
-            self.userinfo_url,
-            headers={"Authorization": "Bearer {}".format(token.token)},
+            self.userinfo_url, headers={"Authorization": f"Bearer {token.token}"}
         )
+
 
         resp.raise_for_status()
         extra_data = resp.json()
-        login = self.get_provider().sociallogin_from_response(request, extra_data)
-        return login
+        return self.get_provider().sociallogin_from_response(request, extra_data)
 
 
 oauth2_login = OAuth2LoginView.adapter_view(NetIQOAuth2Adapter)

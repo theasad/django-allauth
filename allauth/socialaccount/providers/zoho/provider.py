@@ -30,8 +30,7 @@ class ZohoProvider(OAuth2Provider):
 
     def extract_email_addresses(self, data):
         ret = []
-        email = data.get("Email")
-        if email:
+        if email := data.get("Email"):
             ret.append(
                 EmailAddress(
                     email=email,

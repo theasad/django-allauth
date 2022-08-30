@@ -11,10 +11,7 @@ class BitlyAccount(ProviderAccount):
 
     def to_str(self):
         dflt = super(BitlyAccount, self).to_str()
-        return "%s (%s)" % (
-            self.account.extra_data.get("full_name", ""),
-            dflt,
-        )
+        return f'{self.account.extra_data.get("full_name", "")} ({dflt})'
 
 
 class BitlyProvider(OAuth2Provider):

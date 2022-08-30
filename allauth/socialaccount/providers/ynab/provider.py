@@ -16,8 +16,7 @@ class YNABProvider(OAuth2Provider):
     account_class = YNABAccount
 
     def get_default_scope(self):
-        scope = [Scope.ACCESS]
-        return scope
+        return [Scope.ACCESS]
 
     def get_auth_params(self, request, action):
         ret = super(YNABProvider, self).get_auth_params(request, action)

@@ -33,20 +33,18 @@ class AmazonCognitoOAuth2Adapter(OAuth2Adapter):
 
     @property
     def access_token_url(self):
-        return "{}/oauth2/token".format(self.domain)
+        return f"{self.domain}/oauth2/token"
 
     @property
     def authorize_url(self):
-        return "{}/oauth2/authorize".format(self.domain)
+        return f"{self.domain}/oauth2/authorize"
 
     @property
     def profile_url(self):
-        return "{}/oauth2/userInfo".format(self.domain)
+        return f"{self.domain}/oauth2/userInfo"
 
     def complete_login(self, request, app, access_token, **kwargs):
-        headers = {
-            "Authorization": "Bearer {}".format(access_token),
-        }
+        headers = {"Authorization": f"Bearer {access_token}"}
         extra_data = requests.get(self.profile_url, headers=headers)
         extra_data.raise_for_status()
 

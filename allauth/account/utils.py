@@ -103,7 +103,7 @@ def user_field(user, field, *args):
         # Setter
         v = args[0]
         if v:
-            v = v[0:max_length]
+            v = v[:max_length]
         setattr(user, field, v)
     else:
         # Getter
@@ -267,8 +267,7 @@ def setup_user_email(request, user, addresses):
     priority_addresses = []
     # Is there a stashed e-mail?
     adapter = get_adapter(request)
-    stashed_email = adapter.unstash_verified_email(request)
-    if stashed_email:
+    if stashed_email := adapter.unstash_verified_email(request):
         priority_addresses.append(
             EmailAddress(user=user, email=stashed_email, primary=True, verified=True)
         )
@@ -365,23 +364,23 @@ def sync_user_email_addresses(user):
 
 
 def filter_users_by_username(*username):
-    if app_settings.PRESERVE_USERNAME_CASING:
-        qlist = [
-            Q(**{app_settings.USER_MODEL_USERNAME_FIELD + "__iexact": u})
-            for u in username
-        ]
-        q = qlist[0]
-        for q2 in qlist[1:]:
-            q = q | q2
-        ret = get_user_model()._default_manager.filter(q)
-    else:
-        ret = get_user_model()._default_manager.filter(
+    if not app_settings.PRESERVE_USERNAME_CASING:
+        return get_user_model()._default_manager.filter(
             **{
                 app_settings.USER_MODEL_USERNAME_FIELD
                 + "__in": [u.lower() for u in username]
             }
         )
-    return ret
+
+    qlist = [
+        Q(**{f"{app_settings.USER_MODEL_USERNAME_FIELD}__iexact": u})
+        for u in username
+    ]
+
+    q = qlist[0]
+    for q2 in qlist[1:]:
+        q = q | q2
+    return get_user_model()._default_manager.filter(q)
 
 
 def filter_users_by_email(email, is_active=None):
@@ -397,12 +396,14 @@ def filter_users_by_email(email, is_active=None):
     mails = EmailAddress.objects.filter(email__iexact=email)
     if is_active is not None:
         mails = mails.filter(user__is_active=is_active)
-    users = []
-    for e in mails.prefetch_related("user"):
-        if _unicode_ci_compare(e.email, email):
-            users.append(e.user)
+    users = [
+        e.user
+        for e in mails.prefetch_related("user")
+        if _unicode_ci_compare(e.email, email)
+    ]
+
     if app_settings.USER_MODEL_EMAIL_FIELD:
-        q_dict = {app_settings.USER_MODEL_EMAIL_FIELD + "__iexact": email}
+        q_dict = {f"{app_settings.USER_MODEL_EMAIL_FIELD}__iexact": email}
         user_qs = User.objects.filter(**q_dict)
         if is_active is not None:
             user_qs = user_qs.filter(is_active=is_active)
@@ -415,9 +416,8 @@ def filter_users_by_email(email, is_active=None):
 
 def passthrough_next_redirect_url(request, url, redirect_field_name):
     assert url.find("?") < 0  # TODO: Handle this case properly
-    next_url = get_next_redirect_url(request, redirect_field_name)
-    if next_url:
-        url = url + "?" + urlencode({redirect_field_name: next_url})
+    if next_url := get_next_redirect_url(request, redirect_field_name):
+        url = f"{url}?{urlencode({redirect_field_name: next_url})}"
     return url
 
 
@@ -427,10 +427,7 @@ def user_pk_to_url_str(user):
     """
     User = get_user_model()
     if issubclass(type(User._meta.pk), models.UUIDField):
-        if isinstance(user.pk, str):
-            return user.pk
-        return user.pk.hex
-
+        return user.pk if isinstance(user.pk, str) else user.pk.hex
     ret = user.pk
     if isinstance(ret, int):
         ret = int_to_base36(user.pk)

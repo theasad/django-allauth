@@ -39,8 +39,7 @@ class EmailAddress(models.Model):
         return self.email
 
     def set_as_primary(self, conditional=False):
-        old_primary = EmailAddress.objects.get_primary(self.user)
-        if old_primary:
+        if old_primary := EmailAddress.objects.get_primary(self.user):
             if conditional:
                 return False
             old_primary.primary = False
@@ -91,7 +90,7 @@ class EmailConfirmation(models.Model):
         verbose_name_plural = _("email confirmations")
 
     def __str__(self):
-        return "confirmation for %s" % self.email_address
+        return f"confirmation for {self.email_address}"
 
     @classmethod
     def create(cls, email_address):

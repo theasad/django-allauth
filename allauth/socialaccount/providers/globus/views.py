@@ -22,10 +22,9 @@ class GlobusAdapter(OAuth2Adapter):
         extra_data = requests.get(
             self.profile_url,
             params={"access_token": token.token},
-            headers={
-                "Authorization": "Bearer " + token.token,
-            },
+            headers={"Authorization": f"Bearer {token.token}"},
         )
+
 
         return self.get_provider().sociallogin_from_response(request, extra_data.json())
 

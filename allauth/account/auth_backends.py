@@ -15,14 +15,14 @@ class AuthenticationBackend(ModelBackend):
     def authenticate(self, request, **credentials):
         ret = None
         if app_settings.AUTHENTICATION_METHOD == AuthenticationMethod.EMAIL:
-            ret = self._authenticate_by_email(**credentials)
+            return self._authenticate_by_email(**credentials)
         elif app_settings.AUTHENTICATION_METHOD == AuthenticationMethod.USERNAME_EMAIL:
-            ret = self._authenticate_by_email(**credentials)
-            if not ret:
-                ret = self._authenticate_by_username(**credentials)
+            return self._authenticate_by_email(
+                **credentials
+            ) or self._authenticate_by_username(**credentials)
+
         else:
-            ret = self._authenticate_by_username(**credentials)
-        return ret
+            return self._authenticate_by_username(**credentials)
 
     def _authenticate_by_username(self, **credentials):
         username_field = app_settings.USER_MODEL_USERNAME_FIELD
@@ -42,13 +42,7 @@ class AuthenticationBackend(ModelBackend):
             return None
 
     def _authenticate_by_email(self, **credentials):
-        # Even though allauth will pass along `email`, other apps may
-        # not respect this setting. For example, when using
-        # django-tastypie basic authentication, the login is always
-        # passed as `username`.  So let's play nice with other apps
-        # and use username as fallback
-        email = credentials.get("email", credentials.get("username"))
-        if email:
+        if email := credentials.get("email", credentials.get("username")):
             for user in filter_users_by_email(email):
                 if self._check_password(user, credentials["password"]):
                     return user

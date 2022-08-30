@@ -19,11 +19,11 @@ class WeixinOAuth2Client(OAuth2Client):
         }
         if self.state:
             params["state"] = self.state
-        params.update(extra_params)
+        params |= extra_params
         sorted_params = OrderedDict()
         for param in sorted(params):
             sorted_params[param] = params[param]
-        return "%s?%s" % (authorization_url, urlencode(sorted_params))
+        return f"{authorization_url}?{urlencode(sorted_params)}"
 
     def get_access_token(self, code):
         data = {
@@ -42,9 +42,7 @@ class WeixinOAuth2Client(OAuth2Client):
             data = None
         # TODO: Proper exception handling
         resp = requests.request(self.access_token_method, url, params=params, data=data)
-        access_token = None
-        if resp.status_code == 200:
-            access_token = resp.json()
+        access_token = resp.json() if resp.status_code == 200 else None
         if not access_token or "access_token" not in access_token:
-            raise OAuth2Error("Error retrieving access token: %s" % resp.content)
+            raise OAuth2Error(f"Error retrieving access token: {resp.content}")
         return access_token

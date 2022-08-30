@@ -26,7 +26,7 @@ class PersonaProvider(Provider):
     def get_login_url(self, request, **kwargs):
         next_url = "'%s'" % escapejs(kwargs.get("next") or "")
         process = "'%s'" % escapejs(kwargs.get("process") or "login")
-        return "javascript:allauth.persona.login(%s, %s)" % (next_url, process)
+        return f"javascript:allauth.persona.login({next_url}, {process})"
 
     def extract_uid(self, data):
         return data["email"]
@@ -35,8 +35,7 @@ class PersonaProvider(Provider):
         return dict(email=data["email"])
 
     def extract_email_addresses(self, data):
-        ret = [EmailAddress(email=data["email"], verified=True, primary=True)]
-        return ret
+        return [EmailAddress(email=data["email"], verified=True, primary=True)]
 
 
 provider_classes = [PersonaProvider]

@@ -18,10 +18,7 @@ class DataportenAccount(ProviderAccount):
         of the user.
         """
         dflt = super(DataportenAccount, self).to_str()
-        return "%s (%s)" % (
-            self.account.extra_data.get("name", ""),
-            dflt,
-        )
+        return f'{self.account.extra_data.get("name", "")} ({dflt})'
 
 
 class DataportenProvider(OAuth2Provider):

@@ -27,11 +27,11 @@ class FeishuOAuth2Client(OAuth2Client):
         }
         if self.state:
             params["state"] = self.state
-        params.update(extra_params)
+        params |= extra_params
         sorted_params = OrderedDict()
         for param in sorted(params):
             sorted_params[param] = params[param]
-        return "%s?%s" % (authorization_url, urlencode(sorted_params))
+        return f"{authorization_url}?{urlencode(sorted_params)}"
 
     def app_access_token(self):
         data = {
@@ -47,7 +47,7 @@ class FeishuOAuth2Client(OAuth2Client):
         resp.raise_for_status()
         access_token = resp.json()
         if not access_token or "app_access_token" not in access_token:
-            raise OAuth2Error("Error retrieving app access token: %s" % resp.content)
+            raise OAuth2Error(f"Error retrieving app access token: {resp.content}")
         return access_token["app_access_token"]
 
     def get_access_token(self, code):
@@ -77,5 +77,5 @@ class FeishuOAuth2Client(OAuth2Client):
             or "data" not in access_token
             or "access_token" not in access_token["data"]
         ):
-            raise OAuth2Error("Error retrieving access token: %s" % resp.content)
+            raise OAuth2Error(f"Error retrieving access token: {resp.content}")
         return access_token["data"]

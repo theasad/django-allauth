@@ -7,20 +7,22 @@ class TwitterAccount(ProviderAccount):
         return self.account.extra_data.get("screen_name")
 
     def get_profile_url(self):
-        ret = None
-        screen_name = self.get_screen_name()
-        if screen_name:
-            ret = "http://twitter.com/" + screen_name
-        return ret
+        return (
+            f"http://twitter.com/{screen_name}"
+            if (screen_name := self.get_screen_name())
+            else None
+        )
 
     def get_avatar_url(self):
-        ret = None
-        profile_image_url = self.account.extra_data.get("profile_image_url")
-        if profile_image_url:
-            # Hmm, hack to get our hands on the large image.  Not
-            # really documented, but seems to work.
-            ret = profile_image_url.replace("_normal", "")
-        return ret
+        return (
+            profile_image_url.replace("_normal", "")
+            if (
+                profile_image_url := self.account.extra_data.get(
+                    "profile_image_url"
+                )
+            )
+            else None
+        )
 
     def to_str(self):
         screen_name = self.get_screen_name()
@@ -33,11 +35,11 @@ class TwitterProvider(OAuthProvider):
     account_class = TwitterAccount
 
     def get_auth_url(self, request, action):
-        if action == AuthAction.REAUTHENTICATE:
-            url = "https://api.twitter.com/oauth/authorize"
-        else:
-            url = "https://api.twitter.com/oauth/authenticate"
-        return url
+        return (
+            "https://api.twitter.com/oauth/authorize"
+            if action == AuthAction.REAUTHENTICATE
+            else "https://api.twitter.com/oauth/authenticate"
+        )
 
     def extract_uid(self, data):
         return data["id"]

@@ -19,9 +19,7 @@ class DataportenTest(OAuth2TestsMixin, TestCase):
         }
 
     def get_login_response_json(self, with_refresh_token=True):
-        rt = ""
-        if with_refresh_token:
-            rt = ',"refresh_token": "testrf"'
+        rt = ',"refresh_token": "testrf"' if with_refresh_token else ""
         return (
             """{
             "access_token":"testac",

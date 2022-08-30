@@ -23,10 +23,9 @@ class AgaveAdapter(OAuth2Adapter):
         extra_data = requests.get(
             self.profile_url,
             params={"access_token": token.token},
-            headers={
-                "Authorization": "Bearer " + token.token,
-            },
+            headers={"Authorization": f"Bearer {token.token}"},
         )
+
 
         user_profile = (
             extra_data.json()["result"] if "result" in extra_data.json() else {}

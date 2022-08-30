@@ -24,11 +24,7 @@ class StackExchangeProvider(OAuth2Provider):
         return settings.get("SITE", "stackoverflow")
 
     def extract_uid(self, data):
-        # `user_id` varies if you use the same account for
-        # e.g. StackOverflow and ServerFault. Therefore, we pick
-        # `account_id`.
-        uid = str(data["account_id"])
-        return uid
+        return str(data["account_id"])
 
     def extract_common_fields(self, data):
         return dict(username=data.get("display_name"))

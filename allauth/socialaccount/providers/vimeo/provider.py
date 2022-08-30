@@ -12,8 +12,7 @@ class VimeoProvider(OAuthProvider):
     account_class = VimeoAccount
 
     def get_default_scope(self):
-        scope = []
-        return scope
+        return []
 
     def extract_uid(self, data):
         return data["id"]
